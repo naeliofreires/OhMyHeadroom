@@ -1,0 +1,6 @@
+/* English is the development language: the keys in the code are already English text.
+   This file exists so macOS lists English as a supported language. */
+
+"Police Scan" = "Police Scan";
+"Starting the scan…" = "Starting the scan…";
+"Checking %@ of %@" = "Checking %@ of %@";
