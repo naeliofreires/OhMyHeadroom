@@ -65,7 +65,7 @@ final class CleanupModel {
         phase = .scanning
         currentStep = nil
         do {
-            let engine = try LimparEngine.locate()
+            let engine = try CleanupEngine.locate()
             let fresh = try await engine.scan { [weak self] step in
                 Task { @MainActor in self?.showStep(step) }
             }
@@ -84,7 +84,7 @@ final class CleanupModel {
         guard !picked.isEmpty else { return }
         phase = .cleaning
         do {
-            let engine = try LimparEngine.locate()
+            let engine = try CleanupEngine.locate()
             let log = try await engine.apply(picked)
             phase = .finished(log: log)
         } catch {

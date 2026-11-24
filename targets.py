@@ -1,6 +1,6 @@
-"""What limpar-mac inspects, and how far each folder can be trusted.
+"""What the cleanup engine inspects, and how far each folder can be trusted.
 
-Plain data: scan.py measures these entries and limpar.py removes them. Every label
+Plain data: scan.py measures these entries and cleanup.py removes them. Every label
 and note is written in Portuguese and English.
 To watch another folder, add a rule here instead of adding a branch to the code.
 """

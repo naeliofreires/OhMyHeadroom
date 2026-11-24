@@ -2,8 +2,8 @@
 __pycache__/
 *.pyc
 
-# Swift Package Manager build output (rebuilt by menubar/build-app.sh)
-menubar/.build/
+# Swift Package Manager build output (rebuilt by build-app.sh)
+.build/
 
 # macOS metadata
 .DS_Store

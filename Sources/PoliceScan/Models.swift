@@ -51,7 +51,7 @@ struct ReviewLine: Codable, Identifiable, Hashable {
     var id: String { label.en }
 }
 
-/// The full answer of `limpar.py scan --json`.
+/// The full answer of `cleanup.py scan --json`.
 struct ScanReport: Codable {
     let safe: [Category]
     let review: [ReviewLine]

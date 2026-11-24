@@ -18,4 +18,4 @@ cp -R Localization/*.lproj "$app/Contents/Resources/"
 # Ad-hoc signature: enough for a local build on this Mac, not for distribution.
 codesign --force --sign - "$app"
 
-echo "Instalado em: $app"
+echo "Installed at: $app"

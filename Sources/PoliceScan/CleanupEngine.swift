@@ -10,7 +10,7 @@ enum EngineError: LocalizedError {
         case .pythonMissing:
             return String(localized: "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin.")
         case .scriptMissing(let path):
-            return String(localized: "The engine was not found at \(path). It should be in the limpar-mac folder.")
+            return String(localized: "The engine was not found at \(path). It should be in the PoliceScan folder.")
         case .failed(let status, let message):
             return String(localized: "The engine failed with code \(String(status)): \(message)")
         }
@@ -24,8 +24,8 @@ private struct RunningEngine {
     let standardError: Pipe
 }
 
-/// Runs the Python engine in ~/.local/share/limpar-mac and returns what it printed.
-struct LimparEngine: Sendable {
+/// Runs the Python engine in ~/Developer/PoliceScan and returns what it printed.
+struct CleanupEngine: Sendable {
     let pythonPath: String
     let scriptPath: String
 
@@ -45,16 +45,16 @@ struct LimparEngine: Sendable {
         "/sbin",
     ].joined(separator: ":")
 
-    static func locate() throws -> LimparEngine {
+    static func locate() throws -> CleanupEngine {
         let fileManager = FileManager.default
         guard let python = pythonCandidates.first(where: fileManager.isExecutableFile(atPath:)) else {
             throw EngineError.pythonMissing
         }
-        let script = NSHomeDirectory() + "/.local/share/limpar-mac/limpar.py"
+        let script = NSHomeDirectory() + "/Developer/PoliceScan/cleanup.py"
         guard fileManager.fileExists(atPath: script) else {
             throw EngineError.scriptMissing(path: script)
         }
-        return LimparEngine(pythonPath: python, scriptPath: script)
+        return CleanupEngine(pythonPath: python, scriptPath: script)
     }
 
     /// Runs the scan. onStep is called as soon as the engine starts measuring each folder,
@@ -72,7 +72,7 @@ struct LimparEngine: Sendable {
     /// in the app's language.
     func apply(_ categories: [Category]) async throws -> String {
         let input = try EngineJSON.encoder().encode(categories)
-        let arguments = ["apagar", "--lang", LocalizedText.languageCode]
+        let arguments = ["apply", "--lang", LocalizedText.languageCode]
         let output = try await run(arguments: arguments, input: input, onStep: nil)
         return String(decoding: output, as: UTF8.self)
     }

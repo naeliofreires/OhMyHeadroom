@@ -1,7 +1,7 @@
 """JSON boundary between the Python engine and the menu bar app.
 
 `scan --json` prints a Report. The app sends back the categories the user picked,
-on stdin, to `apagar`. Field names are snake_case, so the Swift Codable structs
+on stdin, to `apply`. Field names are snake_case, so the Swift Codable structs
 read them with convertFromSnakeCase.
 """
 
@@ -29,14 +29,14 @@ def categories_from_json(text: str) -> tuple[Category, ...]:
     decoded: object = json.loads(text)
     if not isinstance(decoded, list):
         raise ValueError(
-            f"plano inválido: esperado uma lista de categorias, veio {decoded!r}"
+            f"invalid plan: expected a list of categories, got {decoded!r}"
         )
     return tuple(category_from_value(item) for item in decoded)
 
 
 def category_from_value(value: object) -> Category:
     """Build one Category from a decoded JSON object, checking every field."""
-    raw = as_mapping(value, "uma categoria")
+    raw = as_mapping(value, "a category")
     return Category(
         key=read_text(raw, "key"),
         label=read_localized(raw, "label"),
@@ -49,10 +49,10 @@ def category_from_value(value: object) -> Category:
 
 def sized_path_from_value(value: object) -> SizedPath:
     """Build one SizedPath, rejecting relative paths so a bad plan cannot delete from the cwd."""
-    raw = as_mapping(value, "um caminho com path e size_bytes")
+    raw = as_mapping(value, "a path with path and size_bytes")
     path_text = read_text(raw, "path")
     if not path_text.startswith("/"):
-        raise ValueError(f"caminho relativo recusado: {path_text!r}; use caminho absoluto")
+        raise ValueError(f"relative path refused: {path_text!r}; use an absolute path")
     return SizedPath(path=Path(path_text), size_bytes=read_int(raw, "size_bytes"))
 
 
@@ -60,7 +60,7 @@ def command_from_value(value: object) -> tuple[str, ...]:
     """A cleanup command is a list of strings, e.g. ["docker", "image", "prune"]."""
     if not isinstance(value, list) or not all(isinstance(part, str) for part in value):
         raise ValueError(
-            f"comando inválido: esperado lista de textos, veio {value!r}"
+            f"invalid command: expected a list of strings, got {value!r}"
         )
     return tuple(value)
 
@@ -68,7 +68,7 @@ def command_from_value(value: object) -> tuple[str, ...]:
 def as_mapping(value: object, expected: str) -> dict[str, object]:
     """Require a JSON object; the error names what was expected."""
     if not isinstance(value, dict):
-        raise ValueError(f"esperado {expected}, veio {value!r}")
+        raise ValueError(f"expected {expected}, got {value!r}")
     return value
 
 
@@ -76,7 +76,7 @@ def read_text(raw: dict[str, object], field: str) -> str:
     """Read a required text field."""
     value = raw.get(field)
     if not isinstance(value, str):
-        raise ValueError(f"campo '{field}' deve ser texto, veio {value!r}")
+        raise ValueError(f"field '{field}' must be a string, got {value!r}")
     return value
 
 
@@ -84,7 +84,7 @@ def read_int(raw: dict[str, object], field: str) -> int:
     """Read a required integer field; booleans are refused even though Python counts them as ints."""
     value = raw.get(field)
     if not isinstance(value, int) or isinstance(value, bool):
-        raise ValueError(f"campo '{field}' deve ser inteiro, veio {value!r}")
+        raise ValueError(f"field '{field}' must be an integer, got {value!r}")
     return value
 
 
@@ -92,11 +92,11 @@ def read_list(raw: dict[str, object], field: str) -> list[object]:
     """Read a required list field."""
     value = raw.get(field)
     if not isinstance(value, list):
-        raise ValueError(f"campo '{field}' deve ser lista, veio {value!r}")
+        raise ValueError(f"field '{field}' must be a list, got {value!r}")
     return value
 
 
 def read_localized(raw: dict[str, object], field: str) -> Localized:
     """Read a text field that carries both languages, e.g. {"pt": "...", "en": "..."}."""
-    nested = as_mapping(raw.get(field), f"campo '{field}' com os textos pt e en")
+    nested = as_mapping(raw.get(field), f"field '{field}' with pt and en strings")
     return Localized(pt=read_text(nested, "pt"), en=read_text(nested, "en"))

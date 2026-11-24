@@ -1,6 +1,6 @@
 """Measures every rule in targets.py and turns the numbers into a report.
 
-Nothing here deletes anything: limpar.py decides when to act on these numbers.
+Nothing here deletes anything: cleanup.py decides when to act on these numbers.
 Labels and notes stay bilingual, so the report reads the same for every client.
 """
 
@@ -339,7 +339,7 @@ def parse_docker_size(text: str) -> int:
     match = DOCKER_SIZE_PATTERN.match(text.strip())
     if match is None:
         raise ValueError(
-            f"tamanho do Docker não reconhecido: {text!r}; esperado algo como '2.458GB (7%)'"
+            f"unrecognized Docker size: {text!r}; expected something like '2.458GB (7%)'"
         )
     return int(float(match.group(1)) * DOCKER_UNIT_BYTES[match.group(2)])
 

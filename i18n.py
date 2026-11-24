@@ -1,4 +1,4 @@
-"""Portuguese and English text for limpar-mac.
+"""Portuguese and English text for the cleanup engine.
 
 Data (category labels and notes) carries both languages, so the menu bar app can pick
 its own language without asking the engine again. Terminal output picks one language,

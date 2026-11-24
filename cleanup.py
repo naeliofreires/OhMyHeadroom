@@ -1,12 +1,12 @@
-"""limpar-mac: find regenerable junk on this Mac, and delete it only after you say yes.
+"""Find regenerable junk on this Mac, and delete it only after you say yes.
 
 Commands (add --lang pt or --lang en; without it the shell's locale decides):
-    limpar-mac            same as scan
-    limpar-mac scan       show sizes; deletes nothing
-    limpar-mac scan --json    the same report as JSON, for the menu bar app
-    limpar-mac limpar     ask s/N (or y/N) for each safe category, then delete
-    limpar-mac limpar --yes   delete every safe category without asking
-    limpar-mac apagar     read a JSON list of categories on stdin and delete them
+    python3 cleanup.py            same as scan
+    python3 cleanup.py scan       show sizes; deletes nothing
+    python3 cleanup.py scan --json    the same report as JSON, for the menu bar app
+    python3 cleanup.py clean      ask s/N (or y/N) for each safe category, then delete
+    python3 cleanup.py clean --yes    delete every safe category without asking
+    python3 cleanup.py apply      read a JSON list of categories on stdin and delete them
 """
 
 import os
@@ -23,8 +23,8 @@ from scan import Category, Report, ReviewLine, build_report, disk_free_bytes, di
 from targets import HOME
 
 SCAN_COMMAND = "scan"
-CLEAN_COMMAND = "limpar"
-APPLY_COMMAND = "apagar"
+CLEAN_COMMAND = "clean"
+APPLY_COMMAND = "apply"
 YES_FLAG = "--yes"
 JSON_FLAG = "--json"
 PROGRESS_FLAG = "--progress"
@@ -35,9 +35,9 @@ MEASURING_NOTICE = Localized(
     en="Measuring the disk (1 to 3 minutes the first time)...",
 )
 USAGE = Localized(
-    pt="Comandos: scan | scan --json | limpar | limpar --yes | apagar. "
+    pt="Comandos: scan | scan --json | clean | clean --yes | apply. "
     "Use --lang pt ou --lang en.",
-    en="Commands: scan | scan --json | limpar | limpar --yes | apagar. "
+    en="Commands: scan | scan --json | clean | clean --yes | apply. "
     "Use --lang pt or --lang en.",
 )
 REFUSED_PLAN = Localized(

@@ -30,5 +30,5 @@
 "The app measures these items but deletes none of them." = "O app mede estes itens, mas não apaga nenhum deles.";
 "Show in Finder" = "Mostrar no Finder";
 "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin." = "Python 3 não encontrado em /opt/homebrew/bin nem em /usr/local/bin.";
-"The engine was not found at %@. It should be in the limpar-mac folder." = "Motor não encontrado em %@. Ele deveria estar na pasta limpar-mac.";
+"The engine was not found at %@. It should be in the PoliceScan folder." = "Motor não encontrado em %@. Ele deveria estar na pasta PoliceScan.";
 "The engine failed with code %@: %@" = "O motor falhou com código %@: %@";
