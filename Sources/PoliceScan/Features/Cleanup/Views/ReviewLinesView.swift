@@ -11,9 +11,10 @@ struct ReviewLinesSection: View {
         ReviewRowView(line: line)
       }
     } header: {
-      Text("Review yourself")
+      Text("Manual review")
+        .font(.panelHeading)
     } footer: {
-      Text("The app measures these items but deletes none of them.")
+      Text("These items are never deleted.")
     }
   }
 }
@@ -33,7 +34,7 @@ struct ReviewRowView: View {
         .font(.caption)
         .foregroundStyle(.secondary)
       if let folder = line.folder {
-        Button("Show in Finder") {
+        Button("Show in Finder", systemImage: "folder") {
           revealInFinder(folder)
         }
         .buttonStyle(.link)

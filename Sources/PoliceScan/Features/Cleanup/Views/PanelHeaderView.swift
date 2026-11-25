@@ -13,9 +13,10 @@ struct PanelHeaderView: View {
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 2) {
         Text("Police Scan")
-          .font(.headline)
-        Text("Free now: \(ByteFormat.text(model.freeBytes))")
+          .font(.panelHeading)
+        Text("\(ByteFormat.text(model.freeBytes)) free")
           .font(.subheadline)
+          .monospacedDigit()
           .foregroundStyle(.secondary)
       }
       Spacer()
@@ -28,32 +29,24 @@ struct PanelHeaderView: View {
   }
 
   private var scanButton: some View {
-    HStack(spacing: 8) {
-      busyIndicator
-      Button(scanTitle) {
-        Task { await model.scan() }
-      }
-      .buttonStyle(.bordered)
-      .keyboardShortcut("r")
-      .disabled(model.isBusy)
-    }
-  }
-
-  private var scanTitle: LocalizedStringKey {
-    model.report == nil ? "Scan" : "Scan again"
-  }
-
-  /// Spins next to the button while the disk is being measured or cleaned. The space is
-  /// always reserved, so the button does not jump when the spinner appears.
-  private var busyIndicator: some View {
-    ZStack {
-      if model.isBusy {
-        ProgressView()
-          .controlSize(.small)
-          .accessibilityLabel("Working")
+    Button {
+      Task { await model.scan() }
+    } label: {
+      Label {
+        Text(model.report == nil ? LocalizedStringKey("Scan") : "Rescan")
+      } icon: {
+        if model.isBusy {
+          ProgressView()
+            .controlSize(.small)
+            .accessibilityLabel("Working")
+        } else {
+          Image(systemName: model.report == nil ? "magnifyingglass" : "arrow.clockwise")
+        }
       }
     }
-    .frame(width: 16, height: 16)
+    .buttonStyle(.bordered)
+    .keyboardShortcut("r")
+    .disabled(model.isBusy)
   }
 
   private var optionsMenu: some View {

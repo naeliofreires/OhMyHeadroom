@@ -68,7 +68,7 @@ struct ScanAnimationView: View {
         Text("Starting the scan…")
           .foregroundStyle(.secondary)
       }
-      Text("Measuring the disk. This takes 1 to 2 minutes.")
+      Label("Usually 1–2 min", systemImage: "clock")
         .font(.caption2)
         .foregroundStyle(.tertiary)
     }

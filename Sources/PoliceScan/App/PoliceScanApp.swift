@@ -15,6 +15,7 @@ struct PoliceScanApp: App {
       HStack(spacing: 4) {
         Image(systemName: "internaldrive")
         Text(model.menuBarTitle)
+          .monospacedDigit()
       }
     }
     .menuBarExtraStyle(.window)

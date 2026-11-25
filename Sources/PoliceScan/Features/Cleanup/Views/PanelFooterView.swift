@@ -10,7 +10,7 @@ struct PanelFooterView: View {
         .monospacedDigit()
         .foregroundStyle(.secondary)
       Spacer()
-      Button("Delete selected…", role: .destructive) {
+      Button("Delete…", systemImage: "trash", role: .destructive) {
         model.isConfirmingClean = true
       }
       .buttonStyle(.glassProminent)
@@ -30,7 +30,7 @@ struct PanelFooterView: View {
       }
       Button("Cancel", role: .cancel) {}
     } message: {
-      Text("Apps and tools recreate these files. Dependencies need reinstalling afterwards.")
+      Text("Apps recreate caches. Reinstall dependencies after deletion.")
     }
   }
 
@@ -43,6 +43,6 @@ struct PanelFooterView: View {
 
   private var confirmationTitle: String {
     let size = ByteFormat.text(model.selectedBytes)
-    return String(localized: "Delete the selected categories (\(size))?")
+    return String(localized: "Delete selected items (\(size))?")
   }
 }
