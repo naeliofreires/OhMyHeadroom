@@ -102,7 +102,8 @@ rtk proxy python3 cleanup.py apply --lang en         # Read a cleanup plan from 
 ```
 
 In **Police Scan**, click **Scan**, select categories, then choose **Delete selected…**.
-The app follows your system language.
+The app follows your system language by default. Choose **More options (…) → Language**
+to switch between **English** and **Português (Brasil)**. The app remembers your choice.
 
 ## Build and install the app
 

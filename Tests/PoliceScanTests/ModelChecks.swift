@@ -1,6 +1,28 @@
 import Foundation
 
 @MainActor
+func checkLanguageSwitch() async throws {
+  let defaults = UserDefaults.standard
+  let key = AppLanguage.preferenceKey
+  let previous = defaults.string(forKey: key)
+  defer { defaults.set(previous, forKey: key) }
+
+  let model = makeModel()
+  await model.scan()
+  let label = LocalizedText(pt: "Arquivos", en: "Files")
+  for (language, expectedLabel, engineCode) in [
+    (AppLanguage.english, "Files", "en"), (.portuguese, "Arquivos", "pt"), (.english, "Files", "en"),
+  ] {
+    defaults.set(language.rawValue, forKey: key)
+    let expectedSize = language == .portuguese ? "1,5 MB" : "1.5 MB"
+    try check(ByteFormat.text(1_500_000) == expectedSize, "localized byte formatting")
+    try check(label.text == expectedLabel && AppLanguage.current.engineCode == engineCode,
+              "language mismatch for \(language)")
+    try check(model.phase == .ready && model.selectedKeys == ["caches"], "language reset scan")
+  }
+}
+
+@MainActor
 func checkInitialState() async throws {
   let model = makeModel()
   try check(model.phase == .idle, "initial phase")
@@ -16,6 +38,26 @@ func checkScanSelection() async throws {
   try check(model.phase == .ready, "scan phase")
   try check(model.selectedKeys == ["caches"], "dependency default selection")
   try check(model.selectedBytes == 100, "selected bytes")
+}
+
+@MainActor
+func checkReset() async throws {
+  let gateway = FakeCleanupGateway(report: makeReport())
+  let reader = FakeFreeSpaceReader(value: 700)
+  let model = CleanupModel(gateway: gateway, freeSpaceReader: reader)
+  try check(!model.canReset, "reset available before scanning")
+  await model.scan()
+  try check(model.canReset, "reset unavailable after scan")
+  model.toggle(gateway.report.safe[1])
+  model.showStep(ScanStep(position: 1, total: 1, label: makeText("One"), path: "~/one"))
+  model.isConfirmingClean = true
+  model.reset()
+  try check(model.phase == .idle && !model.canReset, "reset did not return to idle")
+  try check(model.report == nil && model.selectedKeys.isEmpty, "scan results retained")
+  try check(model.currentStep == nil && !model.isConfirmingClean, "transient UI retained")
+  try check(model.freeBytes == 700 && gateway.applyCallCount == 0, "reset side effects")
+  await model.scan()
+  try check(model.phase == .ready && model.selectedKeys == ["caches"], "fresh scan defaults")
 }
 
 @MainActor
@@ -103,12 +145,14 @@ func checkBusyPhases() async throws {
   let scanTask = Task { await model.scan() }
   let scanEvent = await gateway.nextEvent()
   try check(scanEvent == "scan", "scan did not start")
+  model.reset()
   try check(model.phase == .scanning && model.isBusy, "scanning phase not observable")
   await gateway.releaseScan()
   await scanTask.value
   let cleanTask = Task { await model.cleanSelected() }
   let applyEvent = await gateway.nextEvent()
   try check(applyEvent == "apply", "apply did not start")
+  model.reset()
   try check(model.phase == .cleaning && model.isBusy, "cleaning phase not observable")
   await gateway.releaseApply()
   await cleanTask.value

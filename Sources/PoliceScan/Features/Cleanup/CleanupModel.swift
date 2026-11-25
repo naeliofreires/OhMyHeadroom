@@ -35,6 +35,20 @@ final class CleanupModel {
     phase == .scanning || phase == .cleaning
   }
 
+  var canReset: Bool {
+    phase != .idle && !isBusy
+  }
+
+  func reset() {
+    guard canReset else { return }
+    report = nil
+    selectedKeys = []
+    currentStep = nil
+    isConfirmingClean = false
+    freeBytes = freeSpaceReader.currentFreeBytes()
+    phase = .idle
+  }
+
   var selectedCategories: [Category] {
     report?.safe.filter { selectedKeys.contains($0.key) } ?? []
   }
@@ -45,7 +59,7 @@ final class CleanupModel {
 
   var menuBarTitle: String {
     guard let freeBytes else { return "Police Scan" }
-    return String(localized: "\(ByteFormat.text(freeBytes)) free")
+    return String(localized: "\(ByteFormat.text(freeBytes)) free", bundle: AppLanguage.current.stringsBundle)
   }
 
   func isSelected(_ category: Category) -> Bool {
@@ -76,7 +90,10 @@ final class CleanupModel {
     currentStep = nil
     do {
       let fresh = try await gateway.scan { [weak self] step in
-        Task { @MainActor in self?.showStep(step) }
+        Task { @MainActor in
+          guard self?.phase == .scanning else { return }
+          self?.showStep(step)
+        }
       }
       report = fresh
       selectedKeys = Set(fresh.safe.filter { !$0.isOffByDefault }.map(\.key))

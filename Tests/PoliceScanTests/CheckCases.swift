@@ -3,7 +3,9 @@ typealias CheckCase = @MainActor () async throws -> Void
 func allCheckCases() -> [(String, CheckCase)] {
   [
     ("initial state", checkInitialState),
+    ("switch app language", checkLanguageSwitch),
     ("scan selection", checkScanSelection),
+    ("reset and scan again", checkReset),
     ("progress monotonicity", checkProgressMonotonicity),
     ("toggle selection", checkToggleSelection),
     ("empty cleanup", checkEmptyCleanup),

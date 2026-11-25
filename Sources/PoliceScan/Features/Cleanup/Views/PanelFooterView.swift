@@ -41,8 +41,8 @@ struct PanelFooterView: View {
     )
   }
 
-  private var confirmationTitle: String {
+  private var confirmationTitle: LocalizedStringKey {
     let size = ByteFormat.text(model.selectedBytes)
-    return String(localized: "Delete selected items (\(size))?")
+    return "Delete selected items (\(size))?"
   }
 }

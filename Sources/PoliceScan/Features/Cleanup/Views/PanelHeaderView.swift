@@ -1,9 +1,10 @@
 import AppKit
 import SwiftUI
 
-/// App name, free space, the scan button, and the options menu that holds Quit.
+/// App name, free space, the scan button, and the options menu.
 struct PanelHeaderView: View {
   let model: CleanupModel
+  @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
 
   var body: some View {
     HStack(spacing: 12) {
@@ -51,6 +52,16 @@ struct PanelHeaderView: View {
 
   private var optionsMenu: some View {
     Menu {
+      Picker("Language", selection: $language) {
+        Text(verbatim: "English").tag(AppLanguage.english)
+        Text(verbatim: "Português (Brasil)").tag(AppLanguage.portuguese)
+      }
+      .pickerStyle(.menu)
+      Divider()
+      if model.canReset {
+        Button("Reset") { model.reset() }
+        Divider()
+      }
       Button("Quit Police Scan") {
         NSApplication.shared.terminate(nil)
       }
