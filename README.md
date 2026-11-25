@@ -14,24 +14,50 @@ stdout and progress events on stderr. After you confirm a selection, it sends
 the selected categories as JSON on stdin to `python3 cleanup.py apply`. The
 Python engine performs all deletions.
 
+The product is organized around one `Cleanup` feature. Scanning, selection,
+confirmation, and execution share the same category catalog and report lifecycle.
+The app creates dependencies at startup; the feature receives its engine and
+free-space reader so the journey can be tested without running cleanup commands.
+Swift remains one executable target; its feature folders group responsibilities
+within that module. The Python engine has an explicit package boundary, with
+scanning and execution as internal parts of the cleanup feature.
+
+```mermaid
+flowchart TD
+    App[App composition] --> State[Cleanup state and views]
+    App --> Adapter[Python process adapter]
+    State --> Gateway[CleanupGateway]
+    Adapter -. implements .-> Gateway
+    Adapter -->|CLI and JSON| CLI[Python CLI]
+    CLI --> Scan[Cleanup scanning]
+    CLI --> Execute[Cleanup execution]
+    Scan --> Catalog[Cleanup catalog and types]
+    Execute --> Catalog
+    Scan --> Platform[Filesystem and process adapters]
+    Execute --> Platform
+```
+
 ## Project layout
 
 | Path | Purpose |
 |---|---|
-| `cleanup.py` | CLI entry point: `scan`, `clean`, and `apply` |
-| `scan.py` | Measures disk usage in parallel and builds the report; does not delete anything |
-| `targets.py` | Lists safe cleanup categories and review-only paths |
-| `plan.py` | Serializes reports and validates cleanup plans before deletion |
-| `progress.py` | Sends scan progress events to the app |
-| `i18n.py` | Selects the language and handles localized text |
-| `Package.swift`, `Sources/PoliceScan/` | SwiftUI menu bar app |
+| `cleanup.py` | Compatible CLI entry point: `scan`, `clean`, and `apply` |
+| `police_scan_engine/cli/` | Command dispatch, interactive confirmation, and terminal presentation |
+| `police_scan_engine/features/cleanup/` | Category catalog, cleanup types, JSON contract, scanning, and execution |
+| `police_scan_engine/platform/` | Operating-system dependencies used by the engine |
+| `police_scan_engine/i18n.py` | Language selection and localized text |
+| `Sources/PoliceScan/App/` | App entry point and dependency composition |
+| `Sources/PoliceScan/Features/Cleanup/` | Feature state, views, contracts, process adapter, and formatting |
+| `Tests/PoliceScanTests/`, `Tests/Python/` | Headless behavior and regression tests |
+| `Tests/Fixtures/` | Wire-contract examples consumed by both languages |
+| `Package.swift`, `Makefile`, `Tools/check-swift.sh` | App build and the combined verification command |
 | `build-app.sh`, `Info.plist` | Build and installation script, and app bundle metadata |
 | `Tools/make-icon.swift`, `Resources/AppIcon.icns` | Icon generator and app icon |
 | `Localization/` | English and Brazilian Portuguese app strings |
 
 ## Categories
 
-**Safe to delete** (apps or tools recreate the files; dependencies are unchecked by default):
+**Safe to delete** (apps or tools recreate the files; dependencies are unchecked by default in the app):
 
 | Category | Contents |
 |---|---|
@@ -60,9 +86,9 @@ worktrees, MeetingMind and WhatsApp data, Downloads, Movies, and Trash.
 From the repository root:
 
 ```sh
-python3 cleanup.py              # Show the report without deleting anything
-python3 cleanup.py clean        # Ask before cleaning each safe category
-python3 cleanup.py clean --yes  # Clean every safe category without asking
+rtk proxy python3 cleanup.py              # Show the report without deleting anything
+rtk proxy python3 cleanup.py clean        # Ask before cleaning each safe category
+rtk proxy python3 cleanup.py clean --yes  # Clean every safe category without asking
 ```
 
 Use `--lang pt` or `--lang en` to override the shell locale. Command names are the same in both languages.
@@ -70,9 +96,9 @@ Use `--lang pt` or `--lang en` to override the shell locale. Command names are t
 App integration commands:
 
 ```sh
-python3 cleanup.py scan --json             # Write the JSON report to stdout
-python3 cleanup.py scan --json --progress  # Also write progress events to stderr
-python3 cleanup.py apply --lang en         # Read a cleanup plan from stdin and apply it
+rtk proxy python3 cleanup.py scan --json             # Write the JSON report to stdout
+rtk proxy python3 cleanup.py scan --json --progress  # Also write progress events to stderr
+rtk proxy python3 cleanup.py apply --lang en         # Read a cleanup plan from stdin and apply it
 ```
 
 In **Police Scan**, click **Scan**, select categories, then choose **Delete selected…**.
@@ -83,7 +109,7 @@ The app follows your system language.
 Run this from the repository root:
 
 ```sh
-./build-app.sh
+rtk proxy ./build-app.sh
 ```
 
 The script builds and signs the app, then installs it at `~/Applications/Police Scan.app`.
@@ -93,15 +119,19 @@ elsewhere, update `CleanupEngine.locate()` before building.
 To regenerate the icon:
 
 ```sh
-mkdir -p Resources && swiftc Tools/make-icon.swift -o /tmp/make-icon && /tmp/make-icon Resources
+rtk proxy mkdir -p Resources
+rtk proxy swiftc Tools/make-icon.swift -o /tmp/make-icon
+rtk proxy /tmp/make-icon Resources
 ```
 
 ## Safety and permissions
 
-- The engine rejects paths outside the home folder and rejects malformed plans
-  and relative paths before deleting anything.
-- The engine never deletes review-only categories. In interactive mode, an empty
-  response or closed stdin counts as no.
+- The entire plan is parsed before execution; malformed plans and relative paths
+  are rejected at that stage. Each path is checked against the home-folder guard
+  before its removal.
+- Review-only entries are displayed separately and are not offered for deletion
+  by the normal app/CLI flow. In interactive mode, an empty response or closed
+  stdin counts as no.
 - macOS protects Downloads and Trash. Grant **Full Disk Access** to Police Scan
   under **System Settings → Privacy & Security** if those folders show as
   inaccessible. If you use the CLI, grant access to your terminal instead.
@@ -113,11 +143,39 @@ mkdir -p Resources && swiftc Tools/make-icon.swift -o /tmp/make-icon && /tmp/mak
 - `apply` checks the plan's format but does not restrict which commands it can
   contain. Only use it with trusted input.
 - `/tmp` and the user's temporary directory are not scanned.
-- There is no automated test suite.
+- Individual cleanup failures are printed and execution continues; a successful
+  process exit does not establish that every command or path was cleaned.
+
+## Verification
+
+From the repository root, run the Swift and Python suites with one command:
+
+```sh
+rtk proxy make check
+```
+
+Tests use named fakes for disk operations and external commands. They do not
+scan the home directory, run Docker cleanup, or remove user files. Shared JSON
+fixtures cover report decoding, selected-category encoding, and progress events.
+Python tests use the standard library; Swift tests use the installed toolchain.
+There are no third-party test dependencies or services to configure.
+
+The suite characterizes selection defaults, phase transitions, monotonic
+progress, plan validation, command/path ordering, CLI output, and existing
+partial-failure behavior. It does not establish visual correctness or macOS
+privacy permissions. The Swift checks compile the feature's production sources
+with a small native runner: XCTest and Swift Testing are not required, so the
+Command Line Tools installation is sufficient. `make check` also builds the app
+with Swift Package Manager without installing or launching it.
+
+The CLI and JSON contract remain compatible during this structural migration.
+Engine packaging, command authorization, structured cleanup outcomes, and
+process timeouts are separate follow-up changes.
 
 ## Development
 
 - Keep filenames, identifiers, and comments in English.
-- Add category and review text in `targets.py` or `scan.py` as `Localized(pt=..., en=...)`.
+- Add category and review text in the engine's cleanup catalog or scanning modules
+  as `Localized(pt=..., en=...)`.
 - Add SwiftUI text to `Localization/*.lproj/Localizable.strings`. Use the English
   text as the key and provide a Brazilian Portuguese translation in `pt-BR.lproj`.
