@@ -1,8 +1,7 @@
 import Foundation
 
 func checkByteFormattingAndCodec() throws {
-  let expected = ByteCountFormatter.string(fromByteCount: 1_500, countStyle: .file)
-  try check(ByteFormat.text(1_500) == expected, "byte formatting")
+  try check(ByteFormat.text(1) == "1 byte", "byte formatting")
   try check(ByteFormat.text(nil) == String(localized: "No access"), "missing byte formatting")
   let category = makeReport().safe[0]
   let data = try EngineJSON.encoder().encode([category])

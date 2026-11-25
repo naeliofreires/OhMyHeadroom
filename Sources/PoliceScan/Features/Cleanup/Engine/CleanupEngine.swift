@@ -8,12 +8,12 @@ enum EngineError: LocalizedError {
   var errorDescription: String? {
     switch self {
     case .pythonMissing:
-      return String(localized: "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin.")
+      return String(localized: "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin.", bundle: AppLanguage.current.stringsBundle)
     case .scriptMissing(let path):
       return String(
-        localized: "The engine was not found at \(path). It should be in the PoliceScan folder.")
+        localized: "The engine was not found at \(path). It should be in the PoliceScan folder.", bundle: AppLanguage.current.stringsBundle)
     case .failed(let status, let message):
-      return String(localized: "The engine failed with code \(String(status)): \(message)")
+      return String(localized: "The engine failed with code \(String(status)): \(message)", bundle: AppLanguage.current.stringsBundle)
     }
   }
 }
@@ -71,7 +71,7 @@ struct CleanupEngine: CleanupGateway, Sendable {
   /// Sends the picked categories on stdin; the engine deletes them and prints a log.
   func apply(_ categories: [Category]) async throws -> String {
     let input = try EngineJSON.encoder().encode(categories)
-    let arguments = ["apply", "--lang", LocalizedText.languageCode]
+    let arguments = ["apply", "--lang", AppLanguage.current.engineCode]
     let output = try await run(arguments: arguments, input: input, onStep: nil)
     return String(decoding: output, as: UTF8.self)
   }

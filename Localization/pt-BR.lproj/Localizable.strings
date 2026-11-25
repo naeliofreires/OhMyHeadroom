@@ -8,9 +8,11 @@
 "No access" = "Sem acesso";
 "Scan" = "Medir";
 "Rescan" = "Medir novamente";
+"Reset" = "Redefinir";
 "Working" = "Trabalhando";
 "Quit Police Scan" = "Sair do Police Scan";
 "More options" = "Mais opções";
+"Language" = "Idioma";
 "Ready to scan" = "Pronto para medir";
 "Scanning won’t delete files." = "Medir não apaga arquivos.";
 "Usually 1–2 min" = "Em geral, 1–2 min";
