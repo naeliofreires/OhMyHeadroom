@@ -14,14 +14,14 @@ struct PhaseContentView: View {
         switch model.phase {
         case .idle:
             ContentUnavailableView(
-                "Nothing measured yet",
+                "Ready to scan",
                 systemImage: "internaldrive",
-                description: Text("Click Scan to see what can be deleted. Scanning deletes nothing.")
+                description: Text("Scanning won’t delete files.")
             )
         case .scanning:
             ScanAnimationView(step: model.currentStep)
         case .cleaning:
-            workingView("Deleting the selected items…")
+            workingView("Deleting selection…")
         case .ready:
             ReadyFormView(model: model)
         case .finished(let log):
@@ -65,14 +65,15 @@ struct FinishedFormView: View {
 
     var body: some View {
         Form {
-            Section("Done") {
+            Section {
                 Text(log)
                     .font(.system(.callout, design: .monospaced))
                     .textSelection(.enabled)
-            }
-            Section {
-                Text("The earlier numbers are out of date. Click Scan again to see the current state.")
-                    .foregroundStyle(.secondary)
+            } header: {
+                Label("Done", systemImage: "checkmark.circle")
+                    .font(.panelHeading)
+            } footer: {
+                Label("Rescan to update sizes.", systemImage: "arrow.clockwise")
             }
         }
         .formStyle(.grouped)

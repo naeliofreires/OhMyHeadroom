@@ -11,8 +11,9 @@ struct SafeCategoriesSection: View {
             }
         } header: {
             Text("Safe to delete")
+                .font(.panelHeading)
         } footer: {
-            Text("Apps and tools recreate these files. Quit the apps before deleting.")
+            Text("Quit affected apps before deleting.")
         }
     }
 }

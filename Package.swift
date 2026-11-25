@@ -8,7 +8,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "PoliceScan",
-            path: "Sources/PoliceScan"
+            path: "Sources/PoliceScan",
+            resources: [.copy("Fonts")]
         ),
     ]
 )

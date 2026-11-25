@@ -13,6 +13,7 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp .build/release/PoliceScan "$app/Contents/MacOS/PoliceScan"
 cp Info.plist "$app/Contents/Info.plist"
 cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
+cp -R .build/release/PoliceScan_PoliceScan.bundle "$app/Contents/Resources/"
 # One Localizable.strings per language; SwiftUI picks the one that matches the system language.
 cp -R Localization/*.lproj "$app/Contents/Resources/"
 # Ad-hoc signature: enough for a local build on this Mac, not for distribution.
