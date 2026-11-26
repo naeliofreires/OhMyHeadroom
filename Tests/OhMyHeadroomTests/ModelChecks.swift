@@ -293,3 +293,67 @@ func checkDataClassificationAndExpansion() async throws {
   try check(PathDisplay.abbreviate("/var/log/system.log", home: home) == "/var/log/system.log",
             "non-home path abbreviation")
 }
+
+private actor FakeUpdateChecker: UpdateChecking {
+  let installedVersionLabel = "1.0 (1111111)"
+  var nextResult: UpdateCheckResult
+  private(set) var callCount = 0
+
+  init(result: UpdateCheckResult) {
+    self.nextResult = result
+  }
+
+  func setNextResult(_ result: UpdateCheckResult) {
+    nextResult = result
+  }
+
+  func checkForUpdate() async -> UpdateCheckResult {
+    callCount += 1
+    return nextResult
+  }
+}
+
+@MainActor
+func checkUpdateIndicatorAndCooldown() async throws {
+  let payload = Data(
+    #"{"sha":"abcdef1234567890","html_url":"https://github.com/naeliofreires/OhMyHeadroom/commit/abcdef1","commit":{"message":"feat: new release\n\ndetails"}}"#
+      .utf8
+  )
+  try check(GitHubMainUpdateChecker.evaluate(data: payload, installedSHA: "ABCDEF1234567890") == .upToDate,
+            "matching SHA should be up to date")
+  guard case .available(let parsed) = GitHubMainUpdateChecker.evaluate(data: payload, installedSHA: "1111111") else {
+    throw CheckFailure(description: "different SHA should report available update")
+  }
+  try check(parsed.shortLatestSHA == "abcdef1" && parsed.commitTitle == "feat: new release",
+            "parsed update metadata mismatch")
+  try check(GitHubMainUpdateChecker.evaluate(data: Data("{}".utf8), installedSHA: "1111111") == .unavailable,
+            "invalid payload should report unavailable")
+
+  let checker = FakeUpdateChecker(result: .upToDate)
+  let model = CleanupModel(
+    gateway: FakeCleanupGateway(report: makeReport()),
+    freeSpaceReader: FakeFreeSpaceReader(value: 500),
+    updateChecker: checker,
+    updateCooldown: 600
+  )
+  let t0 = Date(timeIntervalSince1970: 1_000)
+  await model.checkForUpdatesIfNeeded(now: t0)
+  try check(model.updateStatus == .idle, "passive upToDate check should remain idle")
+
+  // Within cooldown, passive check is skipped even if remote changes.
+  await checker.setNextResult(.available(parsed))
+  await model.checkForUpdatesIfNeeded(now: t0.addingTimeInterval(60))
+  let callsWithinCooldown = await checker.callCount
+  try check(callsWithinCooldown == 1, "cooldown did not suppress passive check")
+
+  // After cooldown, passive check surfaces the available update.
+  await model.checkForUpdatesIfNeeded(now: t0.addingTimeInterval(700))
+  try check(model.availableUpdate == parsed, "passive check did not surface update")
+
+  // Manual check transitions cleanly to upToDate and can be dismissed.
+  await checker.setNextResult(.upToDate)
+  await model.checkForUpdatesNow(now: t0.addingTimeInterval(710))
+  try check(model.updateStatus == .upToDate, "manual check did not report upToDate")
+  model.dismissUpdateNotice()
+  try check(model.updateStatus == .idle, "dismissUpdateNotice did not reset status")
+}

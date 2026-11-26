@@ -29,6 +29,11 @@ engine="$contents/Resources/Engine"
 mkdir -p "$contents/MacOS" "$engine"
 cp ".build/release/$app_name" "$contents/MacOS/$app_name"
 cp Info.plist "$contents/Info.plist"
+commit_sha="$(git rev-parse HEAD 2>/dev/null || true)"
+if [ -n "$commit_sha" ]; then
+  /usr/libexec/PlistBuddy -c "Add :OhMyHeadroomCommitSHA string $commit_sha" "$contents/Info.plist" 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Set :OhMyHeadroomCommitSHA $commit_sha" "$contents/Info.plist"
+fi
 cp Resources/AppIcon.icns "$contents/Resources/AppIcon.icns"
 cp -R ".build/release/${app_name}_${app_name}.bundle" "$contents/Resources/"
 # One Localizable.strings per language; SwiftUI picks the one that matches the system language.

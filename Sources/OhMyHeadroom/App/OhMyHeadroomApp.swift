@@ -8,7 +8,10 @@ struct OhMyHeadroomApp: App {
   @AppStorage(AppTheme.preferenceKey) private var theme = AppTheme.system
   // A plain constant: the Command Line Tools cannot expand the @State macro, and the app
   // only has this one scene, so the model lives as long as the app does.
-  private let model = CleanupModel(gateway: CleanupComposition.makeGateway())
+  private let model = CleanupModel(
+    gateway: CleanupComposition.makeGateway(),
+    updateChecker: GitHubMainUpdateChecker()
+  )
 
   var body: some Scene {
     MenuBarExtra {
