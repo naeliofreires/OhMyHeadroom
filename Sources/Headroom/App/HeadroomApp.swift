@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Menu bar entry point. The label shows free space, so the number is visible without opening anything.
 @main
-struct PoliceScanApp: App {
+struct HeadroomApp: App {
   @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
   // A plain constant: the Command Line Tools cannot expand the @State macro, and the app
   // only has this one scene, so the model lives as long as the app does.

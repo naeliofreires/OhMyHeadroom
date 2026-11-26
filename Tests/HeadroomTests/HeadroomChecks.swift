@@ -4,7 +4,7 @@ import Foundation
 
 @main
 @MainActor
-struct PoliceScanChecks {
+struct HeadroomChecks {
   static func main() async {
     enforceCheckDeadline()
     let cases = allCheckCases()

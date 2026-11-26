@@ -8,7 +8,7 @@ To watch another folder, add a rule here instead of adding a branch to the code.
 from dataclasses import dataclass
 from pathlib import Path
 
-from police_scan_engine.i18n import Localized
+from headroom_engine.i18n import Localized
 
 HOME: Path = Path.home()
 APP_SUPPORT: Path = HOME / "Library" / "Application Support"

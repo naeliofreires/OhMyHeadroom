@@ -2,16 +2,16 @@
 
 from collections.abc import Callable
 
-from police_scan_engine.features.cleanup.cleanup_types import (
+from headroom_engine.features.cleanup.cleanup_types import (
     Category,
     Report,
     ReviewLine,
 )
-from police_scan_engine.features.cleanup.scanning.report import (
+from headroom_engine.features.cleanup.scanning.report import (
     disk_free_bytes,
     display_path,
 )
-from police_scan_engine.i18n import PORTUGUESE, Localized
+from headroom_engine.i18n import PORTUGUESE, Localized
 
 MEASURING_NOTICE = Localized(
     pt="Medindo o disco (1 a 3 minutos na primeira vez)...",

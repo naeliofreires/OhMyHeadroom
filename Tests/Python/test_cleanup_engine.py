@@ -7,14 +7,14 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from police_scan_engine.cli import commands
-from police_scan_engine.features.cleanup import contracts
-from police_scan_engine.features.cleanup.cleanup_types import Category, SizedPath
-from police_scan_engine.features.cleanup.execution import runner
-from police_scan_engine.features.cleanup.scanning import docker, measurements
-from police_scan_engine.features.cleanup.scanning.progress import ProgressReporter
-from police_scan_engine.features.cleanup.scanning.report import build_report
-from police_scan_engine.i18n import normalize_language
+from headroom_engine.cli import commands
+from headroom_engine.features.cleanup import contracts
+from headroom_engine.features.cleanup.cleanup_types import Category, SizedPath
+from headroom_engine.features.cleanup.execution import runner
+from headroom_engine.features.cleanup.scanning import docker, measurements
+from headroom_engine.features.cleanup.scanning.progress import ProgressReporter
+from headroom_engine.features.cleanup.scanning.report import build_report
+from headroom_engine.i18n import normalize_language
 from cleanup_test_support import (
     FIXTURES,
     FakeCompletedProcess,
@@ -258,7 +258,7 @@ class ProgressTests(unittest.TestCase):
 
 class FormattingTests(unittest.TestCase):
     def test_language_and_size_formatting(self) -> None:
-        from police_scan_engine.cli.presentation import format_size
+        from headroom_engine.cli.presentation import format_size
 
         self.assertEqual("pt", normalize_language("pt_BR.UTF-8"))
         self.assertEqual("1,2 KB", format_size(1234, "pt"))

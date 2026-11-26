@@ -3,11 +3,11 @@
 from collections.abc import Sequence
 from pathlib import Path
 
-from police_scan_engine.features.cleanup.catalog import HOME
-from police_scan_engine.features.cleanup.cleanup_types import Category, SizedPath
-from police_scan_engine.i18n import Localized
-from police_scan_engine.platform.filesystem import FileSystem
-from police_scan_engine.platform.processes import ProcessRunner
+from headroom_engine.features.cleanup.catalog import HOME
+from headroom_engine.features.cleanup.cleanup_types import Category, SizedPath
+from headroom_engine.i18n import Localized
+from headroom_engine.platform.filesystem import FileSystem
+from headroom_engine.platform.processes import ProcessRunner
 
 
 def children_of(folder: Path, filesystem: FileSystem | None = None) -> list[Path]:

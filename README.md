@@ -1,10 +1,10 @@
-# Police Scan
+# Headroom
 
-Police Scan finds files your Mac can recreate, such as caches, downloaded packages,
+Headroom finds files your Mac can recreate, such as caches, downloaded packages,
 Docker images, dependencies, and build artifacts. It estimates how much space each
 category could free and deletes only the categories you select.
 
-- **Police Scan.app**: a SwiftUI menu bar app with scan progress and a confirmation step.
+- **Headroom.app**: a SwiftUI menu bar app with scan progress and a confirmation step.
 - **`cleanup.py`**: the command-line interface, using the same engine as the app.
 
 ## How it works
@@ -42,13 +42,13 @@ flowchart TD
 | Path | Purpose |
 |---|---|
 | `cleanup.py` | Compatible CLI entry point: `scan`, `clean`, and `apply` |
-| `police_scan_engine/cli/` | Command dispatch, interactive confirmation, and terminal presentation |
-| `police_scan_engine/features/cleanup/` | Category catalog, cleanup types, JSON contract, scanning, and execution |
-| `police_scan_engine/platform/` | Operating-system dependencies used by the engine |
-| `police_scan_engine/i18n.py` | Language selection and localized text |
-| `Sources/PoliceScan/App/` | App entry point and dependency composition |
-| `Sources/PoliceScan/Features/Cleanup/` | Feature state, views, contracts, process adapter, and formatting |
-| `Tests/PoliceScanTests/`, `Tests/Python/` | Headless behavior and regression tests |
+| `headroom_engine/cli/` | Command dispatch, interactive confirmation, and terminal presentation |
+| `headroom_engine/features/cleanup/` | Category catalog, cleanup types, JSON contract, scanning, and execution |
+| `headroom_engine/platform/` | Operating-system dependencies used by the engine |
+| `headroom_engine/i18n.py` | Language selection and localized text |
+| `Sources/Headroom/App/` | App entry point and dependency composition |
+| `Sources/Headroom/Features/Cleanup/` | Feature state, views, contracts, process adapter, and formatting |
+| `Tests/HeadroomTests/`, `Tests/Python/` | Headless behavior and regression tests |
 | `Tests/Fixtures/` | Wire-contract examples consumed by both languages |
 | `Package.swift`, `Makefile`, `Tools/check-swift.sh` | App build and the combined verification command |
 | `build-app.sh`, `Info.plist` | Build and installation script, and app bundle metadata |
@@ -101,7 +101,7 @@ rtk proxy python3 cleanup.py scan --json --progress  # Also write progress event
 rtk proxy python3 cleanup.py apply --lang en         # Read a cleanup plan from stdin and apply it
 ```
 
-In **Police Scan**, click **Scan**, select categories, then choose **Delete selected…**.
+In **Headroom**, click **Scan**, select categories, then choose **Delete selected…**.
 The app follows your system language by default. Choose **More options (…) → Language**
 to switch between **English** and **Português (Brasil)**. The app remembers your choice.
 
@@ -113,15 +113,15 @@ Run this from the repository root:
 rtk proxy ./build-app.sh
 ```
 
-The script builds and signs the app, then installs it at `~/Applications/Police Scan.app`.
-The app looks for `cleanup.py` in `~/Developer/PoliceScan`; if your checkout lives
+The script builds and signs the app, then installs it at `~/Applications/Headroom.app`.
+The app looks for `cleanup.py` in `~/Developer/Headroom`; if your checkout lives
 elsewhere, update `CleanupEngine.locate()` before building.
 
 To regenerate the icon:
 
 ```sh
 rtk proxy mkdir -p Resources
-rtk proxy swiftc Tools/make-icon.swift -o /tmp/make-icon
+rtk proxy swiftc Sources/Headroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/make-icon
 rtk proxy /tmp/make-icon Resources
 ```
 
@@ -133,7 +133,7 @@ rtk proxy /tmp/make-icon Resources
 - Review-only entries are displayed separately and are not offered for deletion
   by the normal app/CLI flow. In interactive mode, an empty response or closed
   stdin counts as no.
-- macOS protects Downloads and Trash. Grant **Full Disk Access** to Police Scan
+- macOS protects Downloads and Trash. Grant **Full Disk Access** to Headroom
   under **System Settings → Privacy & Security** if those folders show as
   inaccessible. If you use the CLI, grant access to your terminal instead.
 - The app is signed ad hoc. macOS may ask for permission again after a rebuild.
