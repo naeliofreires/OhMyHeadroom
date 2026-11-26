@@ -11,7 +11,7 @@ struct MenuPanelView: View {
         PanelHeaderView(model: model)
       }
       .safeAreaInset(edge: .bottom, spacing: 0) {
-        if model.report != nil {
+        if model.report != nil && !model.isConfirmingClean && model.phase != .cleaning {
           PanelFooterView(model: model)
         }
       }

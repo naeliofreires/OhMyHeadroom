@@ -23,7 +23,11 @@ struct PhaseContentView: View {
     case .cleaning:
       workingView("Clearing selected categories…")
     case .ready:
-      ReadyFormView(model: model)
+      if model.isConfirmingClean {
+        confirmationView
+      } else {
+        ReadyFormView(model: model)
+      }
     case .finished(let log):
       FinishedFormView(log: log)
     case .failed(let message):
@@ -33,6 +37,30 @@ struct PhaseContentView: View {
         description: Text(message)
       )
     }
+  }
+
+  private var confirmationView: some View {
+    let size = ByteFormat.text(model.selectedBytes)
+    return VStack(spacing: 12) {
+      Text("Clear selected categories (\(size))?")
+        .font(.headline)
+      Text("Files in the selected categories will be removed. Apps recreate caches. Reinstall dependencies after cleanup.")
+        .foregroundStyle(.secondary)
+      HStack(spacing: 12) {
+        Button("Cancel", role: .cancel) {
+          model.isConfirmingClean = false
+        }
+        .buttonStyle(.bordered)
+        .keyboardShortcut(.cancelAction)
+        Button("Clear", role: .destructive) {
+          Task { await model.cleanSelected() }
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(.red)
+      }
+    }
+    .multilineTextAlignment(.center)
+    .padding(.horizontal, 32)
   }
 
   private func workingView(_ message: LocalizedStringKey) -> some View {

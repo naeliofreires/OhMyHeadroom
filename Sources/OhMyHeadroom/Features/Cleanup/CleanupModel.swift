@@ -107,7 +107,8 @@ final class CleanupModel {
   /// Deletes what the user picked. The report is dropped afterwards because its sizes are stale.
   func cleanSelected() async {
     let picked = selectedCategories
-    guard !picked.isEmpty else { return }
+    guard phase == .ready, !picked.isEmpty else { return }
+    isConfirmingClean = false
     phase = .cleaning
     do {
       let log = try await gateway.apply(picked)

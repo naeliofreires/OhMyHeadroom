@@ -149,11 +149,13 @@ func checkBusyPhases() async throws {
   try check(model.phase == .scanning && model.isBusy, "scanning phase not observable")
   await gateway.releaseScan()
   await scanTask.value
+  model.isConfirmingClean = true
   let cleanTask = Task { await model.cleanSelected() }
   let applyEvent = await gateway.nextEvent()
   try check(applyEvent == "apply", "apply did not start")
   model.reset()
   try check(model.phase == .cleaning && model.isBusy, "cleaning phase not observable")
+  try check(!model.isConfirmingClean, "confirmation retained while cleaning")
   await gateway.releaseApply()
   await cleanTask.value
 }
