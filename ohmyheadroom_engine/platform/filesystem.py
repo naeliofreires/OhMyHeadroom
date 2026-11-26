@@ -53,3 +53,11 @@ class FileSystem:
     def unlink(self, path: Path) -> None:
         """Remove one file or symlink, ignoring an already absent path."""
         path.unlink(missing_ok=True)
+
+    def move(self, source: Path, destination: Path) -> None:
+        """Rename one entry to a new path on the same volume."""
+        source.rename(destination)
+
+    def make_directory(self, path: Path) -> None:
+        """Create a private folder, accepting one that already exists."""
+        path.mkdir(mode=0o700, parents=True, exist_ok=True)
