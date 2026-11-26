@@ -64,4 +64,31 @@ struct CategorySelection: Sendable {
     }
     pickedByKey[category.key] = picked
   }
+
+  /// The categories with at least one picked item, each reduced to its picked paths and commands.
+  /// Example: `selection.selectedCategories(from: report.safe)`.
+  func selectedCategories(from categories: [Category]) -> [Category] {
+    categories.compactMap { narrowed($0) }
+  }
+
+  private func narrowed(_ category: Category) -> Category? {
+    let picked = pickedByKey[category.key] ?? []
+    let paths = category.paths.filter { picked.contains($0.path) }
+    let commands = category.commands.filter { picked.contains(Self.commandLine($0)) }
+    if paths.isEmpty && commands.isEmpty { return nil }
+    return Category(
+      key: category.key,
+      label: category.label,
+      note: category.note,
+      sizeBytes: narrowedSize(of: category, keptPaths: paths),
+      paths: paths,
+      commands: commands
+    )
+  }
+
+  /// A category without paths keeps its own size; otherwise its size is the kept paths' sum.
+  private func narrowedSize(of category: Category, keptPaths: [SizedPath]) -> Int {
+    if category.paths.isEmpty { return category.sizeBytes }
+    return keptPaths.reduce(0) { $0 + $1.sizeBytes }
+  }
 }

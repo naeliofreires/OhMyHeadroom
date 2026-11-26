@@ -77,3 +77,45 @@ func checkPartialCategoryClickSelectsAll() async throws {
   selection.toggleCategory(category)
   try check(selection.state(of: category) == .all, "partial click did not select every path")
 }
+
+@MainActor
+func checkSelectedCategoriesKeepPickedPaths() async throws {
+  let category = makeDependencyCategory(count: 4, sizeBytes: 10)
+  var selection = CategorySelection(categories: [category])
+  selection.toggleCategory(category)
+  selection.toggleItem(pathString(2), in: category)
+
+  let narrowed = selection.selectedCategories(from: [category])
+  try check(narrowed.count == 1, "expected one selected category")
+  try check(narrowed[0].paths.map(\.path) == [pathString(1), pathString(3), pathString(4)],
+            "picked paths were not kept in their original order")
+  try check(narrowed[0].sizeBytes == 30, "category size is not the sum of picked paths")
+}
+
+@MainActor
+func checkEmptyCategoryAbsentFromSelection() async throws {
+  let category = makeDependencyCategory(count: 2)
+  let selection = CategorySelection(categories: [category])
+
+  try check(selection.selectedCategories(from: [category]).isEmpty,
+            "unselected category reached the cleanup")
+}
+
+@MainActor
+func checkCommandCategoryKeepsSize() async throws {
+  let docker = Category(
+    key: "docker-prune",
+    label: makeText("Docker"),
+    note: makeText("Images"),
+    sizeBytes: 50,
+    paths: [],
+    commands: [["docker", "image", "prune", "-a", "-f"]]
+  )
+  let selection = CategorySelection(categories: [docker])
+
+  let narrowed = selection.selectedCategories(from: [docker])
+  try check(narrowed.count == 1 && narrowed[0].sizeBytes == 50,
+            "command category lost its size")
+  try check(narrowed[0].commandLines == ["docker image prune -a -f"],
+            "command category lost its command")
+}

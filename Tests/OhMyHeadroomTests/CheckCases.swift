@@ -27,6 +27,9 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("category toggle selects all paths", checkCategoryToggleSelectsAllPaths),
     ("partial selection state", checkPartialSelectionState),
     ("partial category click selects all", checkPartialCategoryClickSelectsAll),
+    ("selected categories keep picked paths", checkSelectedCategoriesKeepPickedPaths),
+    ("empty category absent from selection", checkEmptyCategoryAbsentFromSelection),
+    ("command category keeps its size", checkCommandCategoryKeepsSize),
   ]
 }
 
