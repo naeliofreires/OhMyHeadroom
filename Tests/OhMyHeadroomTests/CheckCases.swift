@@ -32,6 +32,8 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("command category keeps its size", checkCommandCategoryKeepsSize),
     ("selected path count summary", checkSelectedPathCountSummary),
     ("unchecking every path clears category", checkUncheckingEveryPathClearsCategory),
+    ("row total follows picked paths", checkRowTotalFollowsPickedPaths),
+    ("command category has no path count", checkCommandCategoryHasNoPathCount),
     ("foreign item is ignored", checkForeignItemIsIgnored),
     ("path picking limited to dependencies", checkPathPickingLimitedToDependencies),
     ("confirmation count from model", checkConfirmationCountFromModel),

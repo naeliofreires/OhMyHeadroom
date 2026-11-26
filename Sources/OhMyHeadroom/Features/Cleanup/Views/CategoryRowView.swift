@@ -52,12 +52,17 @@ struct CategoryRowView: View {
         .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
-      Text(ByteFormat.text(category.sizeBytes))
+      Text(ByteFormat.text(pickedBytes))
         .font(.system(.body, weight: .semibold))
         .monospacedDigit()
-        .foregroundStyle(category.sizeBytes > 0 ? .primary : .secondary)
+        .foregroundStyle(pickedBytes > 0 ? .primary : .secondary)
         .fixedSize()
     }
+  }
+
+  /// The header shows what the user picked, so a partly picked row matches what will be cleared.
+  private var pickedBytes: Int {
+    model.pickedBytes(for: category)
   }
 
   private var metadataRow: some View {

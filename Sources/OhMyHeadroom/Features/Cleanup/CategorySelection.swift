@@ -85,6 +85,16 @@ struct CategorySelection: Sendable {
     categories.compactMap { narrowed($0) }
   }
 
+  /// The bytes the user picked in a category: the sum of picked paths, or the category's own size
+  /// for a command category that is picked. Example: `selection.pickedBytes(for: category)`.
+  func pickedBytes(for category: Category) -> Int {
+    if category.paths.isEmpty {
+      return state(of: category) == .none ? 0 : category.sizeBytes
+    }
+    let picked = category.paths.filter { isItemSelected($0.path, in: category) }
+    return picked.reduce(0) { $0 + $1.sizeBytes }
+  }
+
   /// "3 de 12 caminhos" when only some paths are picked; nil when none or all are.
   /// Example: `selection.pathCountSummary(for: category)`.
   func pathCountSummary(for category: Category) -> LocalizedText? {

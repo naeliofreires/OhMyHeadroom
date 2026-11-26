@@ -121,6 +121,36 @@ func checkCommandCategoryKeepsSize() async throws {
             "command category lost its command")
 }
 
+/// The row total is the picked bytes: 0 when none, the full sum when all, the picked sum otherwise.
+@MainActor
+func checkRowTotalFollowsPickedPaths() async throws {
+  let category = makeDependencyCategory(count: 3)
+  var selection = CategorySelection(categories: [category])
+  try check(selection.pickedBytes(for: category) == 0, "unpicked row total is not 0")
+
+  selection.toggleCategory(category)
+  try check(selection.pickedBytes(for: category) == 60, "full row total is not 10+20+30")
+
+  selection.toggleItem(pathString(2), in: category)
+  try check(selection.pickedBytes(for: category) == 40, "partial row total is not 10+30")
+}
+
+/// A command category has no path count: the summary is about paths only.
+@MainActor
+func checkCommandCategoryHasNoPathCount() async throws {
+  let docker = Category(
+    key: "docker-prune",
+    label: makeText("Docker"),
+    note: makeText("Images"),
+    sizeBytes: 50,
+    paths: [],
+    commands: [["docker", "image", "prune", "-a", "-f"]]
+  )
+  let selection = CategorySelection(categories: [docker])
+  try check(selection.pathCountSummary(for: docker) == nil, "command category showed a path count")
+  try check(selection.pickedBytes(for: docker) == 50, "picked command category lost its size")
+}
+
 /// Unchecking every path one by one must read as unchecked, not partial or full.
 @MainActor
 func checkUncheckingEveryPathClearsCategory() async throws {
