@@ -1,6 +1,7 @@
 /* Portuguese (Brazil) texts for the Police Scan interface. The key is the English text. */
 
 "Police Scan" = "Police Scan";
+"Scanning your Mac" = "Analisando seu Mac";
 "Starting the scan…" = "Iniciando a medição…";
 "Checking %@ of %@" = "Verificando %@ de %@";
 "Free now: %@" = "Livre agora: %@";
@@ -15,7 +16,6 @@
 "Language" = "Idioma";
 "Ready to scan" = "Pronto para medir";
 "Scanning won’t delete files." = "Medir não apaga arquivos.";
-"Usually 1–2 min" = "Em geral, 1–2 min";
 "Deleting selection…" = "Apagando seleção…";
 "Could not finish" = "Não foi possível concluir";
 "Done" = "Concluído";
