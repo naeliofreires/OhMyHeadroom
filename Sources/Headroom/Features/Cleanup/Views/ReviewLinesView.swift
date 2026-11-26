@@ -14,7 +14,7 @@ struct ReviewLinesSection: View {
       Text("Manual review")
         .font(.panelHeading)
     } footer: {
-      Text("These items are never deleted.")
+      Text("Headroom leaves these items in place.")
     }
   }
 }

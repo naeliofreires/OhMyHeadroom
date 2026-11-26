@@ -26,7 +26,7 @@ struct ScanAnimationView: View {
           .frame(height: 80)
       }
       .frame(maxWidth: 336)
-      Text("Scanning won’t delete files.")
+      Text("Scanning only measures disk usage.")
         .font(.system(size: 12))
         .foregroundStyle(.secondary)
         .frame(maxWidth: 336)

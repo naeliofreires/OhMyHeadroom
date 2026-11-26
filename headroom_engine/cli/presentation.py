@@ -1,4 +1,4 @@
-"""Terminal presentation and exact legacy text for the cleanup CLI."""
+"""Localized terminal presentation for the cleanup CLI."""
 
 from collections.abc import Callable
 
@@ -22,19 +22,20 @@ USAGE = Localized(
     en="Commands: scan | scan --json | clean | clean --yes | apply. Use --lang pt or --lang en.",
 )
 REFUSED_PLAN = Localized(
-    pt="Plano recusado, nada foi apagado: {error}",
-    en="Plan refused, nothing was deleted: {error}",
+    pt="Plano recusado, nenhuma limpeza foi realizada: {error}",
+    en="Plan refused, no cleanup performed: {error}",
 )
 CONFIRM_QUESTION = Localized(
-    pt="\nApagar '{label}' ({size})? [s/N] ", en="\nDelete '{label}' ({size})? [y/N] "
+    pt="\nLimpar '{label}' ({size})? [s/N] ",
+    en="\nClear '{label}' ({size})? [y/N] ",
 )
 SAFE_HEADING = Localized(
-    pt="=== SEGURO PARA APAGAR (o app ou a ferramenta recria) ===",
-    en="=== SAFE TO DELETE (the app or tool recreates it) ===",
+    pt="=== SEGURO PARA LIMPAR (o app ou a ferramenta recria os arquivos) ===",
+    en="=== SAFE TO CLEAR (the app or tool recreates the files) ===",
 )
 REVIEW_HEADING = Localized(
-    pt="=== REVISAR VOCÊ MESMO (o script não apaga isto) ===",
-    en="=== REVIEW YOURSELF (the script deletes none of this) ===",
+    pt="=== REVISÃO MANUAL (o script mantém estes itens no lugar) ===",
+    en="=== MANUAL REVIEW (the script leaves these items in place) ===",
 )
 TOTAL_SAFE = Localized(pt="Total seguro: {size}", en="Total safe: {size}")
 FREE_NOW = Localized(pt="Espaço livre agora: {size}", en="Free space now: {size}")
@@ -44,7 +45,7 @@ FREED_THIS_RUN = Localized(
     en="Freed in this run: {freed}. Free space now: {free}",
 )
 CANCELLED = Localized(
-    pt="Cancelado. Nada mais foi apagado.", en="Cancelled. Nothing else was deleted."
+    pt="Cancelado. A limpeza foi interrompida.", en="Cancelled. Cleanup stopped."
 )
 NO_ACCESS = Localized(pt="sem acesso", en="no access")
 
@@ -70,7 +71,7 @@ def format_size(size_bytes: int | None, language: str) -> str:
 def print_report(
     report: Report, language: str, free_bytes: Callable[[], int] | None = None
 ) -> None:
-    """Render the report with legacy wording. Example: ``print_report(report, 'en')``."""
+    """Render the localized report. Example: ``print_report(report, 'en')``."""
     print(f"\n{SAFE_HEADING.for_language(language)}")
     for number, category in enumerate(report.safe, start=1):
         print_category(number, category, language)

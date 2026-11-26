@@ -9,7 +9,7 @@ category could free and deletes only the categories you select.
 - **Headroom.app**: a SwiftUI menu bar app with scan progress and a confirmation step.
 - **`cleanup.py`**: the command-line interface, using the same engine as the app.
 
-<img src="Resources/Headroom-screenshot.png" alt="Headroom scan results with cleanup categories, estimated space, and a delete button" width="460" />
+<img src="Resources/Headroom-screenshot.png" alt="Headroom scan results with cleanup categories, estimated space, and a cleanup button" width="460" />
 
 ## Install from source
 
@@ -28,7 +28,7 @@ open "$HOME/Applications/Headroom.app"
 The script builds and signs a local copy of the app and bundles the Python engine.
 You can move or remove the checkout after installation. When Headroom appears in
 the menu bar, click **Scan** to see what it found. Select the categories you want
-to remove, then click **Delete…** and confirm.
+to clear, then click **Clear…** and confirm.
 
 The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
 shows a report without deleting anything.
@@ -87,7 +87,7 @@ flowchart TD
 
 ## Categories
 
-**Safe to delete** (apps or tools recreate the files; dependencies are unchecked by default in the app):
+**Safe to clear** (apps or tools recreate the files; dependencies are unchecked by default in the app):
 
 | Category | Contents |
 |---|---|

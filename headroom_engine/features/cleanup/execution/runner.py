@@ -22,7 +22,8 @@ PATH_OUTSIDE_HOME = Localized(
     en="  skipped {path}: outside the user folder",
 )
 PATH_NOT_DELETED = Localized(
-    pt="  não consegui apagar {path}: {error}", en="  could not delete {path}: {error}"
+    pt="  não foi possível remover {path}: {error}",
+    en="  could not remove {path}: {error}",
 )
 
 

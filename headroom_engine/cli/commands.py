@@ -155,7 +155,7 @@ def confirm_clean(category: Category, assume_yes: bool, language: str) -> bool:
 
 
 def read_yes(question: str) -> bool:
-    """Treat EOF as negative. Example: ``read_yes('Delete? ')``."""
+    """Treat EOF as negative. Example: ``read_yes('Clear? ')``."""
     try:
         answer = input(question)
     except EOFError:
