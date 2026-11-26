@@ -77,6 +77,23 @@ struct CategoryRowView: View {
     }
   }
 
+  /// Dependency categories pick path by path. Other categories are cleared or kept whole.
+  @ViewBuilder
+  private func pathCheckbox(for item: SizedPath) -> some View {
+    if category.dataKind.group == .dependencies {
+      Button {
+        model.toggleItem(item.path, in: category)
+      } label: {
+        SelectionCheckbox(state: pathState(for: item))
+      }
+      .buttonStyle(.plain)
+    }
+  }
+
+  private func pathState(for item: SizedPath) -> CategorySelection.State {
+    model.isItemSelected(item.path, in: category) ? .all : .none
+  }
+
   @ViewBuilder
   private var targetBreakdown: some View {
     if !category.paths.isEmpty {
@@ -85,6 +102,7 @@ struct CategoryRowView: View {
       TargetContainer {
         ForEach(Array(visible.enumerated()), id: \.offset) { _, item in
           HStack(spacing: 6) {
+            pathCheckbox(for: item)
             Image(systemName: "folder")
               .font(.caption2)
               .foregroundStyle(.tertiary)
