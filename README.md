@@ -1,11 +1,15 @@
 # Headroom
 
+<img src="Resources/Headroom-icon.png" alt="Headroom app icon" width="112" />
+
 Headroom finds files your Mac can recreate, such as caches, downloaded packages,
 Docker images, dependencies, and build artifacts. It estimates how much space each
 category could free and deletes only the categories you select.
 
 - **Headroom.app**: a SwiftUI menu bar app with scan progress and a confirmation step.
 - **`cleanup.py`**: the command-line interface, using the same engine as the app.
+
+<img src="Resources/Headroom-screenshot.png" alt="Headroom scan results with cleanup categories, estimated space, and a delete button" width="460" />
 
 ## Install from source
 
