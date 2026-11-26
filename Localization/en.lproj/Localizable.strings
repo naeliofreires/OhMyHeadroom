@@ -18,3 +18,5 @@
 "Unavailable" = "Unavailable";
 "The remaining size could not be measured. See the cleanup log below." = "The remaining size could not be measured. See the cleanup log below.";
 "Scan again to refresh all categories." = "Scan again to refresh all categories.";
+"Move to Trash" = "Move to Trash";
+"Space is freed only when the Trash is emptied." = "Space is freed only when the Trash is emptied.";
