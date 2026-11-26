@@ -10,10 +10,10 @@ struct SafeCategoriesSection: View {
         CategoryRowView(category: category, model: model)
       }
     } header: {
-      Text("Safe to delete")
+      Text("Safe to clear")
         .font(.panelHeading)
     } footer: {
-      Text("Quit affected apps before deleting.")
+      Text("Quit affected apps before clearing these categories.")
     }
   }
 }

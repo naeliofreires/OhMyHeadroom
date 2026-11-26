@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The selected total and the destructive action. Delete always asks first, with Cancel offered.
+/// The selected total and the cleanup action, which asks for confirmation before removing files.
 struct PanelFooterView: View {
   let model: CleanupModel
 
@@ -10,11 +10,10 @@ struct PanelFooterView: View {
         .monospacedDigit()
         .foregroundStyle(.secondary)
       Spacer()
-      Button("Delete…", systemImage: "trash", role: .destructive) {
+      Button("Clear…", systemImage: "eraser") {
         model.isConfirmingClean = true
       }
       .buttonStyle(.glassProminent)
-      .tint(.red)
       .disabled(model.selectedCategories.isEmpty || model.isBusy)
     }
     .padding(14)
@@ -25,12 +24,12 @@ struct PanelFooterView: View {
       isPresented: confirmationBinding,
       titleVisibility: .visible
     ) {
-      Button("Delete", role: .destructive) {
+      Button("Clear", role: .destructive) {
         Task { await model.cleanSelected() }
       }
       Button("Cancel", role: .cancel) {}
     } message: {
-      Text("Apps recreate caches. Reinstall dependencies after deletion.")
+      Text("Files in the selected categories will be removed. Apps recreate caches. Reinstall dependencies after cleanup.")
     }
   }
 
@@ -43,6 +42,6 @@ struct PanelFooterView: View {
 
   private var confirmationTitle: LocalizedStringKey {
     let size = ByteFormat.text(model.selectedBytes)
-    return "Delete selected items (\(size))?"
+    return "Clear selected categories (\(size))?"
   }
 }

@@ -16,12 +16,12 @@ struct PhaseContentView: View {
       ContentUnavailableView(
         "Ready to scan",
         systemImage: "internaldrive",
-        description: Text("Scanning won’t delete files.")
+        description: Text("Scanning only measures disk usage.")
       )
     case .scanning:
       ScanAnimationView(step: model.currentStep)
     case .cleaning:
-      workingView("Deleting selection…")
+      workingView("Clearing selected categories…")
     case .ready:
       ReadyFormView(model: model)
     case .finished(let log):

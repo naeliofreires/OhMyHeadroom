@@ -215,7 +215,7 @@ class ExecutionTests(unittest.TestCase):
                 "en",
                 FailingFileSystem(Path("/Users/example")),
             )
-        self.assertIn("could not delete", output.getvalue())
+        self.assertIn("could not remove", output.getvalue())
 
 
 class ProgressTests(unittest.TestCase):

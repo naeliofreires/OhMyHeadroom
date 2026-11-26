@@ -97,8 +97,8 @@ SAFE_RULES: tuple[SafeRule, ...] = (
             en="Old logs (~/Library/Logs)",
         ),
         note=Localized(
-            pt="Registros de diagnóstico. Apagar não afeta nenhum app.",
-            en="Diagnostic records. Deleting them does not affect any app.",
+            pt="Registros de diagnóstico. A limpeza não afeta nenhum app.",
+            en="Diagnostic records. Clearing them does not affect any app.",
         ),
         folders=(HOME / "Library" / "Logs",),
     ),
@@ -113,16 +113,16 @@ REVIEW_RULES: tuple[ReviewRule, ...] = (
             en="Claude VM image (vm_bundles)",
         ),
         note=Localized(
-            pt="Usada pelo Cowork e pelos agentes. Apagar obriga novo download na próxima vez.",
-            en="Used by Cowork and the agents. Deleting it forces a new download next time.",
+            pt="Usada pelo Cowork e pelos agentes. Se for removida, será baixada novamente.",
+            en="Used by Cowork and the agents. If removed, it will be downloaded again.",
         ),
         folder=APP_SUPPORT / "Claude" / "vm_bundles",
     ),
     ReviewRule(
         label=Localized(pt="Disco virtual do Docker", en="Docker virtual disk"),
         note=Localized(
-            pt="Não encolhe só por apagar imagens. Para reduzir, use o próprio Docker Desktop.",
-            en="It does not shrink just from deleting images. "
+            pt="Não encolhe só por remover imagens. Para reduzir, use o próprio Docker Desktop.",
+            en="It does not shrink just from removing images. "
             "To reduce it, use Docker Desktop itself.",
         ),
         folder=HOME / "Library" / "Containers" / "com.docker.docker",
@@ -133,8 +133,8 @@ REVIEW_RULES: tuple[ReviewRule, ...] = (
             en="Codex history and packages (~/.codex)",
         ),
         note=Localized(
-            pt="Sessões antigas do Codex. Apagar perde o histórico.",
-            en="Old Codex sessions. Deleting them loses the history.",
+            pt="Sessões antigas do Codex. Remover esses dados faz você perder o histórico.",
+            en="Old Codex sessions. Removing this data erases the history.",
         ),
         folder=HOME / ".codex",
     ),
@@ -155,8 +155,8 @@ REVIEW_RULES: tuple[ReviewRule, ...] = (
             en="Cursor state (User + snapshots)",
         ),
         note=Localized(
-            pt="Workspaces e snapshots de agentes. Apagar perde o histórico local.",
-            en="Workspaces and agent snapshots. Deleting them loses the local history.",
+            pt="Workspaces e snapshots de agentes. Remover esses dados faz você perder o histórico local.",
+            en="Workspaces and agent snapshots. Removing this data erases the local history.",
         ),
         folder=APP_SUPPORT / "Cursor",
     ),
