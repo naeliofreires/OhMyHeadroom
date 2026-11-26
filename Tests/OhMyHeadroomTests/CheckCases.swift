@@ -31,6 +31,7 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("empty category absent from selection", checkEmptyCategoryAbsentFromSelection),
     ("command category keeps its size", checkCommandCategoryKeepsSize),
     ("selected path count summary", checkSelectedPathCountSummary),
+    ("confirmation count from model", checkConfirmationCountFromModel),
     ("partial cleanup sends selected paths", checkPartialCleanupSendsSelectedPaths),
     ("selected bytes follow path selection", checkSelectedBytesFollowPathSelection),
     ("empty category left out of cleanup", checkEmptyCategoryLeftOutOfCleanup),

@@ -98,3 +98,17 @@ func checkRescanResetsPathSelection() async throws {
   try check(model.selectionState(of: rescanned) == .none,
             "rescan kept a path selection from before")
 }
+
+@MainActor
+func checkConfirmationCountFromModel() async throws {
+  let (model, _) = makePartialDependencyModel()
+  await model.scan()
+  let dependency = try requireDependencyCategory(model)
+  model.toggle(dependency)
+  model.toggleItem(pathString(2), in: dependency)
+
+  let summary = model.pathCountSummary(forKey: "deps-projects")
+  try check(summary == LocalizedText(pt: "2 de 3 caminhos", en: "2 of 3 paths"),
+            "confirmation summary is wrong: \(String(describing: summary))")
+  try check(model.pathCountSummary(forKey: "caches") == nil, "whole category showed a count")
+}

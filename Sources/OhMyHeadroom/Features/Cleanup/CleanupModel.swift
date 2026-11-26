@@ -84,6 +84,12 @@ final class CleanupModel {
     return Set(keys)
   }
 
+  /// "3 de 12 caminhos" for a category the user only partly picked, looked up by key in the scan.
+  func pathCountSummary(forKey key: String) -> LocalizedText? {
+    guard let category = report?.safe.first(where: { $0.key == key }) else { return nil }
+    return selection.pathCountSummary(for: category)
+  }
+
   var selectedCategories: [Category] {
     selection.selectedCategories(from: report?.safe ?? [])
   }
