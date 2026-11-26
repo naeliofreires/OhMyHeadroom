@@ -104,3 +104,36 @@ class FakeDeletionFileSystem(FileSystem):
     def unlink(self, path: Path) -> None:
         """Record file or symlink removal."""
         self.operations.append(("unlink", path))
+
+
+class FakeTrashFileSystem(FileSystem):
+    """Filesystem fake for Trash naming and moves: records moves and folder creation."""
+
+    def __init__(self, home: Path) -> None:
+        super().__init__(home)
+        self.existing: set[Path] = set()
+        self.moves: list[tuple[Path, Path]] = []
+        self.created_directories: list[Path] = []
+        self.removals: list[tuple[str, Path]] = []
+
+    def exists(self, path: Path) -> bool:
+        """Return whether the configured path is present."""
+        return path in self.existing
+
+    def move(self, source: Path, destination: Path) -> None:
+        """Record a move and keep the destination present."""
+        self.moves.append((source, destination))
+        self.existing.add(destination)
+
+    def make_directory(self, path: Path) -> None:
+        """Record folder creation and mark it present."""
+        self.created_directories.append(path)
+        self.existing.add(path)
+
+    def remove_tree(self, path: Path) -> None:
+        """Record a tree removal so tests can assert nothing was deleted."""
+        self.removals.append(("remove_tree", path))
+
+    def unlink(self, path: Path) -> None:
+        """Record an unlink so tests can assert nothing was deleted."""
+        self.removals.append(("unlink", path))
