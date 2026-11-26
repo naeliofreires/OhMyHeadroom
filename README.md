@@ -1,15 +1,15 @@
-# Headroom
+# OhMyHeadroom
 
-<img src="Resources/Headroom-icon.png" alt="Headroom app icon" width="112" />
+<img src="Resources/OhMyHeadroom-icon.png" alt="OhMyHeadroom app icon" width="112" />
 
-Headroom finds files your Mac can recreate, such as caches, downloaded packages,
+OhMyHeadroom finds files your Mac can recreate, such as caches, downloaded packages,
 Docker images, dependencies, and build artifacts. It estimates how much space each
 category could free and deletes only the categories you select.
 
-- **Headroom.app**: a SwiftUI menu bar app with scan progress and a confirmation step.
+- **OhMyHeadroom.app** is a SwiftUI menu bar app with scan progress and a confirmation step.
 - **`cleanup.py`**: the command-line interface, using the same engine as the app.
 
-<img src="Resources/Headroom-screenshot.png" alt="Headroom in dark mode showing scan results, estimated space, and the Clear button" width="460" />
+<img src="Resources/OhMyHeadroom-screenshot.png" alt="OhMyHeadroom in dark mode showing scan results, estimated space, and the Clear button" width="460" />
 
 ## Install from source
 
@@ -19,26 +19,32 @@ category could free and deletes only the categories you select.
 - Docker is optional. Docker entries are omitted when Docker is unavailable.
 
 ```sh
-git clone https://github.com/naeliofreires/Headroom.git
-cd Headroom
+git clone https://github.com/naeliofreires/Headroom.git OhMyHeadroom
+cd OhMyHeadroom
 ./build-app.sh
-open "$HOME/Applications/Headroom.app"
 ```
 
 The script builds and signs a local copy of the app and bundles the Python engine.
-You can move or remove the checkout after installation. When Headroom appears in
-the menu bar, click **Scan** to see what it found. Select the categories you want
-to clear, then click **Clear…** and confirm.
+You can move or remove the checkout after installation. If you previously installed
+Headroom, quit it and move `~/Applications/Headroom.app` to the Trash before opening
+the new app. Your language and theme preferences carry over.
+
+```sh
+open "$HOME/Applications/OhMyHeadroom.app"
+```
+
+When OhMyHeadroom appears in the menu bar, click **Scan** to see what it found.
+Select the categories you want to clear, then click **Clear…** and confirm.
 
 The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
 shows a report without deleting anything.
 
-Headroom supports English and Brazilian Portuguese. The app follows the system
+OhMyHeadroom supports English and Brazilian Portuguese. The app follows the system
 language by default. Use **More options (…) → Language** to change it, or pass
 `--lang pt` or `--lang en` to the CLI.
 
 Use **More options (…) → Theme** to choose **Light**, **Dark**, or **System**.
-Headroom follows the macOS appearance by default and remembers your selection.
+OhMyHeadroom follows the macOS appearance by default and remembers your selection.
 
 ## How it works
 
@@ -75,13 +81,13 @@ flowchart TD
 | Path | Purpose |
 |---|---|
 | `cleanup.py` | Compatible CLI entry point: `scan`, `clean`, and `apply` |
-| `headroom_engine/cli/` | Command dispatch, interactive confirmation, and terminal presentation |
-| `headroom_engine/features/cleanup/` | Category catalog, cleanup types, JSON contract, scanning, and execution |
-| `headroom_engine/platform/` | Operating-system dependencies used by the engine |
-| `headroom_engine/i18n.py` | Language selection and localized text |
-| `Sources/Headroom/App/` | App entry point and dependency composition |
-| `Sources/Headroom/Features/Cleanup/` | Feature state, views, contracts, process adapter, and formatting |
-| `Tests/HeadroomTests/`, `Tests/Python/` | Headless behavior and regression tests |
+| `ohmyheadroom_engine/cli/` | Command dispatch, interactive confirmation, and terminal presentation |
+| `ohmyheadroom_engine/features/cleanup/` | Category catalog, cleanup types, JSON contract, scanning, and execution |
+| `ohmyheadroom_engine/platform/` | Operating-system dependencies used by the engine |
+| `ohmyheadroom_engine/i18n.py` | Language selection and localized text |
+| `Sources/OhMyHeadroom/App/` | App entry point and dependency composition |
+| `Sources/OhMyHeadroom/Features/Cleanup/` | Feature state, views, contracts, process adapter, and formatting |
+| `Tests/OhMyHeadroomTests/`, `Tests/Python/` | Headless behavior and regression tests |
 | `Tests/Fixtures/` | Wire-contract examples consumed by both languages |
 | `Package.swift`, `Makefile`, `Tools/check-swift.sh` | App build and the combined verification command |
 | `build-app.sh`, `Info.plist` | Build and installation script, and app bundle metadata |
@@ -102,7 +108,7 @@ flowchart TD
 | Worktree dependencies | `node_modules`, `.venv`, `.next`, `.turbo`, and `__pycache__` in agent and Herdr worktrees |
 | Project dependencies | The same folders in primary project checkouts |
 
-Headroom looks for project dependencies under `~/Developer`, `~/.herdr`, `~/.t3`,
+OhMyHeadroom looks for project dependencies under `~/Developer`, `~/.herdr`, `~/.t3`,
 and `~/.synara`. Docker commands use the active Docker context.
 
 **Review only** (measured and listed, never deleted): Claude VM image, Docker virtual
@@ -129,7 +135,7 @@ with your permissions. Use it only with trusted input.
 - Review-only entries are displayed separately and are not offered for deletion
   by the normal app/CLI flow. In interactive mode, an empty response or closed
   stdin counts as no.
-- macOS protects Downloads and Trash. Grant **Full Disk Access** to Headroom
+- macOS protects Downloads and Trash. Grant **Full Disk Access** to OhMyHeadroom
   under **System Settings → Privacy & Security** if those folders show as
   inaccessible. If you use the CLI, grant access to your terminal instead.
 - The app is signed ad hoc. macOS may ask for permission again after a rebuild.
@@ -175,11 +181,11 @@ with Swift Package Manager without installing or launching it.
 To regenerate the icon:
 
 ```sh
-swiftc Sources/Headroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/headroom-make-icon
-/tmp/headroom-make-icon Resources
+swiftc Sources/OhMyHeadroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/ohmyheadroom-make-icon
+/tmp/ohmyheadroom-make-icon Resources
 ```
 
 ## License
 
-Headroom is released under the [MIT License](LICENSE).
-The bundled IBM Plex Sans font is distributed under the [SIL Open Font License](Sources/Headroom/Fonts/LICENSE.txt).
+OhMyHeadroom is released under the [MIT License](LICENSE).
+The bundled IBM Plex Sans font is distributed under the [SIL Open Font License](Sources/OhMyHeadroom/Fonts/LICENSE.txt).

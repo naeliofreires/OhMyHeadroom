@@ -1,11 +1,12 @@
 #!/bin/sh
-# Builds Headroom and installs it in ~/Applications as a menu bar app (LSUIElement: no Dock icon).
+# Builds OhMyHeadroom and installs it in ~/Applications as a menu bar app (LSUIElement: no Dock icon).
 set -eu
 
 here="$(cd "$(dirname "$0")" && pwd)"
 cd "$here"
 
-app="$HOME/Applications/Headroom.app"
+app_name="OhMyHeadroom"
+app="$HOME/Applications/$app_name.app"
 if [ -e "$app" ] || [ -L "$app" ]; then
   identifier=""
   if [ ! -L "$app" ] && [ -d "$app" ]; then
@@ -20,20 +21,20 @@ fi
 swift build -c release
 
 mkdir -p "$HOME/Applications"
-staging="$(mktemp -d "$HOME/Applications/.headroom.XXXXXXXX")"
+staging="$(mktemp -d "$HOME/Applications/.ohmyheadroom.XXXXXXXX")"
 trap 'rm -rf "$staging"' EXIT
-staged_app="$staging/Headroom.app"
+staged_app="$staging/$app_name.app"
 contents="$staged_app/Contents"
 engine="$contents/Resources/Engine"
 mkdir -p "$contents/MacOS" "$engine"
-cp .build/release/Headroom "$contents/MacOS/Headroom"
+cp ".build/release/$app_name" "$contents/MacOS/$app_name"
 cp Info.plist "$contents/Info.plist"
 cp Resources/AppIcon.icns "$contents/Resources/AppIcon.icns"
-cp -R .build/release/Headroom_Headroom.bundle "$contents/Resources/"
+cp -R ".build/release/${app_name}_${app_name}.bundle" "$contents/Resources/"
 # One Localizable.strings per language; SwiftUI picks the one that matches the system language.
 cp -R Localization/*.lproj "$contents/Resources/"
 cp cleanup.py "$engine/"
-rsync -r --exclude='__pycache__/' --exclude='*.pyc' headroom_engine "$engine/"
+rsync -r --exclude='__pycache__/' --exclude='*.pyc' ohmyheadroom_engine "$engine/"
 # Ad-hoc signature for a local build.
 codesign --force --sign - "$staged_app"
 

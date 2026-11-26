@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-  name: "Headroom",
+  name: "OhMyHeadroom",
   // Liquid Glass (glassEffect, glassProminent) exists from macOS 26 on.
   platforms: [.macOS("26.0")],
   targets: [
     .executableTarget(
-      name: "Headroom",
-      path: "Sources/Headroom",
+      name: "OhMyHeadroom",
+      path: "Sources/OhMyHeadroom",
       resources: [.copy("Fonts")]
     )
   ]

@@ -1,6 +1,6 @@
-/* Portuguese (Brazil) texts for the Headroom interface. The key is the English text. */
+/* Portuguese (Brazil) texts for the OhMyHeadroom interface. The key is the English text. */
 
-"Headroom" = "Headroom";
+"OhMyHeadroom" = "OhMyHeadroom";
 "Scanning your Mac" = "Analisando seu Mac";
 "Starting the scan…" = "Iniciando a medição…";
 "Checking %@ of %@" = "Verificando %@ de %@";
@@ -11,7 +11,7 @@
 "Rescan" = "Medir novamente";
 "Reset" = "Redefinir";
 "Working" = "Trabalhando";
-"Quit Headroom" = "Sair do Headroom";
+"Quit OhMyHeadroom" = "Sair do OhMyHeadroom";
 "More options" = "Mais opções";
 "Language" = "Idioma";
 "Theme" = "Tema";
@@ -33,8 +33,8 @@
 "Cancel" = "Cancelar";
 "Files in the selected categories will be removed. Apps recreate caches. Reinstall dependencies after cleanup." = "Os arquivos das categorias selecionadas serão removidos. Os apps recriam os caches. Reinstale as dependências após a limpeza.";
 "Manual review" = "Revisão manual";
-"Headroom leaves these items in place." = "O Headroom mantém estes itens no lugar.";
+"OhMyHeadroom leaves these items in place." = "O OhMyHeadroom mantém estes itens no lugar.";
 "Show in Finder" = "Mostrar no Finder";
 "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin." = "Python 3 não encontrado em /opt/homebrew/bin nem em /usr/local/bin.";
-"The engine was not found at %@. Reinstall Headroom to restore it." = "Motor não encontrado em %@. Reinstale o Headroom para restaurá-lo.";
+"The engine was not found at %@. Reinstall OhMyHeadroom to restore it." = "Motor não encontrado em %@. Reinstale o OhMyHeadroom para restaurá-lo.";
 "The engine failed with code %@: %@" = "O motor falhou com código %@: %@";

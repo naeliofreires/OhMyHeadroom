@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Headroom</string>
+    <string>OhMyHeadroom</string>
     <key>CFBundleDisplayName</key>
-    <string>Headroom</string>
+    <string>OhMyHeadroom</string>
     <key>CFBundleIdentifier</key>
     <string>local.police-scan</string>
     <key>CFBundleExecutable</key>
-    <string>Headroom</string>
+    <string>OhMyHeadroom</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleIconFile</key>
