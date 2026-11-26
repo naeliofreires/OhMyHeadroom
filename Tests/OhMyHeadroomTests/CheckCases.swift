@@ -25,6 +25,10 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("update indicator and cooldown", checkUpdateIndicatorAndCooldown),
     ("apply arguments omit permanent by default", { try checkApplyArgumentsOmitPermanentByDefault() }),
     ("apply arguments add permanent when requested", { try checkApplyArgumentsAddPermanentWhenRequested() }),
+    ("trash toggle default sends trash", checkTrashToggleDefaultSendsTrash),
+    ("trash toggle off sends permanent", checkTrashToggleOffSendsPermanent),
+    ("trash note shown while toggle on", { try checkTrashNoteShownWhileToggleOn() }),
+    ("trash note hidden while toggle off", { try checkTrashNoteHiddenWhileToggleOff() }),
   ]
 }
 
