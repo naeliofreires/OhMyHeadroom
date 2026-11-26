@@ -11,7 +11,7 @@ enum EngineError: LocalizedError {
       return String(localized: "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin.", bundle: AppLanguage.current.stringsBundle)
     case .scriptMissing(let path):
       return String(
-        localized: "The engine was not found at \(path). It should be in the Headroom folder.", bundle: AppLanguage.current.stringsBundle)
+        localized: "The engine was not found at \(path). Reinstall Headroom to restore it.", bundle: AppLanguage.current.stringsBundle)
     case .failed(let status, let message):
       return String(localized: "The engine failed with code \(String(status)): \(message)", bundle: AppLanguage.current.stringsBundle)
     }
@@ -25,7 +25,7 @@ private struct RunningEngine {
   let standardError: Pipe
 }
 
-/// Runs the Python engine in ~/Developer/Headroom and returns what it printed.
+/// Runs the bundled Python engine and returns what it printed.
 struct CleanupEngine: CleanupGateway, Sendable {
   let pythonPath: String
   let scriptPath: String
@@ -51,7 +51,7 @@ struct CleanupEngine: CleanupGateway, Sendable {
     guard let python = pythonCandidates.first(where: fileManager.isExecutableFile(atPath:)) else {
       throw EngineError.pythonMissing
     }
-    let script = NSHomeDirectory() + "/Developer/Headroom/cleanup.py"
+    let script = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/Engine/cleanup.py").path
     guard fileManager.fileExists(atPath: script) else {
       throw EngineError.scriptMissing(path: script)
     }
@@ -93,7 +93,7 @@ struct CleanupEngine: CleanupGateway, Sendable {
   private func startProcess(arguments: [String], input: Data) throws -> RunningEngine {
     let process = Process()
     process.executableURL = URL(fileURLWithPath: pythonPath)
-    process.arguments = [scriptPath] + arguments
+    process.arguments = ["-B", scriptPath] + arguments
     process.environment = environmentWithToolPath()
 
     let standardOutput = Pipe()
