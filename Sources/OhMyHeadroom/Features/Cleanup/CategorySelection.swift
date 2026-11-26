@@ -55,7 +55,10 @@ struct CategorySelection: Sendable {
     pickedByKey[category.key] = Set(allItemsByKey[category.key] ?? [])
   }
 
+  /// Ignores an item that does not belong to the category, so it cannot skew the state.
   mutating func toggleItem(_ item: String, in category: Category) {
+    let belongs = allItemsByKey[category.key]?.contains(item) ?? false
+    if !belongs { return }
     var picked = pickedByKey[category.key] ?? []
     if picked.contains(item) {
       picked.remove(item)

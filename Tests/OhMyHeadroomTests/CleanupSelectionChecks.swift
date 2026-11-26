@@ -38,7 +38,7 @@ func checkPartialCleanupSendsSelectedPaths() async throws {
   }
   try check(sent.paths.map(\.path) == [pathString(1), pathString(3)],
             "cleanup sent unselected paths")
-  try check(sent.sizeBytes == 20, "sent size is not the sum of selected paths")
+  try check(sent.sizeBytes == 40, "sent size is not the sum of selected paths (10+30)")
 }
 
 @MainActor
@@ -47,10 +47,10 @@ func checkSelectedBytesFollowPathSelection() async throws {
   await model.scan()
   let dependency = try requireDependencyCategory(model)
   model.toggle(dependency)
-  try check(model.selectedBytes == 130, "header total did not include every dependency path")
+  try check(model.selectedBytes == 160, "header total did not include every dependency path (100+10+20+30)")
 
   model.toggleItem(pathString(2), in: dependency)
-  try check(model.selectedBytes == 120, "header total did not drop the unchecked path")
+  try check(model.selectedBytes == 140, "header total did not drop the unchecked path's 20 bytes")
 }
 
 @MainActor
