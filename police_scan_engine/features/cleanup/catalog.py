@@ -14,9 +14,9 @@ HOME: Path = Path.home()
 APP_SUPPORT: Path = HOME / "Library" / "Application Support"
 # macOS privacy protection (TCC) blocks reads of these folders until the app or terminal is allowed.
 PRIVACY_HINT = Localized(
-    pt="Sem permissão de leitura: dê Acesso Total ao Disco ao Police Scan "
+    pt="Sem permissão de leitura: dê Acesso Total ao Disco ao Headroom "
     "ou ao app de terminal (Ajustes > Privacidade e Segurança).",
-    en="No read permission: give Full Disk Access to Police Scan or your terminal app "
+    en="No read permission: give Full Disk Access to Headroom or your terminal app "
     "(System Settings > Privacy & Security).",
 )
 

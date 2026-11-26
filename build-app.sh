@@ -1,13 +1,24 @@
 #!/bin/sh
-# Builds Police Scan and installs it in ~/Applications as a menu bar app (LSUIElement: no Dock icon).
+# Builds Headroom and installs it in ~/Applications as a menu bar app (LSUIElement: no Dock icon).
 set -eu
 
 here="$(cd "$(dirname "$0")" && pwd)"
 cd "$here"
 
+app="$HOME/Applications/Headroom.app"
+if [ -e "$app" ] || [ -L "$app" ]; then
+  identifier=""
+  if [ ! -L "$app" ] && [ -d "$app" ]; then
+    identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist" 2>/dev/null || true)"
+  fi
+  if [ "$identifier" != "local.police-scan" ]; then
+    echo "Refusing to replace unrelated app: $app" >&2
+    exit 1
+  fi
+fi
+
 swift build -c release
 
-app="$HOME/Applications/Police Scan.app"
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp .build/release/PoliceScan "$app/Contents/MacOS/PoliceScan"
@@ -20,3 +31,9 @@ cp -R Localization/*.lproj "$app/Contents/Resources/"
 codesign --force --sign - "$app"
 
 echo "Installed at: $app"
+
+legacy_app="$HOME/Applications/Police Scan.app"
+if [ -e "$legacy_app" ] || [ -L "$legacy_app" ]; then
+  echo "Previous installation left unchanged: $legacy_app"
+  echo "Quit the old app before opening Headroom."
+fi

@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Police Scan</string>
+    <string>Headroom</string>
     <key>CFBundleDisplayName</key>
-    <string>Police Scan</string>
+    <string>Headroom</string>
     <key>CFBundleIdentifier</key>
     <string>local.police-scan</string>
     <key>CFBundleExecutable</key>
