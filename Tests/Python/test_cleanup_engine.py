@@ -3,13 +3,15 @@
 import io
 import json
 import unittest
+from collections.abc import Sequence
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import replace
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from ohmyheadroom_engine.cli import commands
 from ohmyheadroom_engine.features.cleanup import contracts
-from ohmyheadroom_engine.features.cleanup.cleanup_types import Category, SizedPath
+from ohmyheadroom_engine.features.cleanup.cleanup_types import Category, CleanupResult, SizedPath
 from ohmyheadroom_engine.features.cleanup.execution import runner
 from ohmyheadroom_engine.features.cleanup.scanning import docker, measurements
 from ohmyheadroom_engine.features.cleanup.scanning.progress import ProgressReporter
@@ -40,6 +42,14 @@ class ContractTests(unittest.TestCase):
         payload = json.loads((FIXTURES / "scan-report.json").read_text())
         report = contracts.report_to_json(report_from_payload(payload))
         self.assertEqual(json.loads(report), payload)
+
+    def test_cleanup_result_fixture_matches_serializer(self) -> None:
+        payload = json.loads((FIXTURES / "cleanup-result.json").read_text())
+        result = CleanupResult(before_bytes=1200, after_bytes=200, log="done\n")
+        self.assertEqual(payload, json.loads(contracts.cleanup_result_to_json(result)))
+        payload["after_bytes"] = None
+        unavailable = replace(result, after_bytes=None)
+        self.assertEqual(payload, json.loads(contracts.cleanup_result_to_json(unavailable)))
 
     def test_plan_fixture_parses_all_categories_before_returning(self) -> None:
         text = (FIXTURES / "cleanup-plan.json").read_text()
@@ -85,6 +95,7 @@ class CommandTests(unittest.TestCase):
                     self.assertEqual(0, commands.main(argv, language))
                 self.assertTrue(output.getvalue().startswith(heading))
                 self.assertIn("python3 cleanup.py", output.getvalue())
+                self.assertIn("apply --json", output.getvalue())
 
     def test_unknown_command_returns_two_without_scanning(self) -> None:
         output = io.StringIO()
@@ -154,30 +165,107 @@ class CommandTests(unittest.TestCase):
     def test_apply_invalid_trailing_category_has_no_effect(self) -> None:
         payload = json.loads((FIXTURES / "cleanup-plan.json").read_text())
         payload.append({"key": "broken"})
-        error = io.StringIO()
-        with redirect_stderr(error), patch.object(commands, "clean_category") as clean:
-            self.assertEqual(1, commands.run_apply(json.dumps(payload), "en"))
-        clean.assert_not_called()
-        self.assertIn("Plan refused", error.getvalue())
+        report = report_from_payload(json.loads((FIXTURES / "scan-report.json").read_text()))
+        for json_output in (False, True):
+            with self.subTest(json_output=json_output):
+                error, output = io.StringIO(), io.StringIO()
+                clean, free_reader, measure = Mock(), Mock(), Mock()
+                operations = operations_for_report(report, free_reader, clean, measure)
+                with redirect_stderr(error), redirect_stdout(output):
+                    code = commands.run_apply(
+                        json.dumps(payload), "en", operations, json_output=json_output
+                    )
+                self.assertEqual(1, code)
+                free_reader.assert_not_called()
+                clean.assert_not_called()
+                measure.assert_not_called()
+                self.assertEqual("", output.getvalue())
+                self.assertIn("Plan refused", error.getvalue())
+
+    def test_apply_json_measures_only_the_plan_after_execution(self) -> None:
+        report = report_from_payload(json.loads((FIXTURES / "scan-report.json").read_text()))
+        plan = (FIXTURES / "cleanup-plan.json").read_text()
+        events: list[str] = []
+        free_values = iter((9000, 9500))
+
+        def free_bytes() -> int:
+            events.append("free")
+            return next(free_values)
+
+        def apply(category: Category, language: str) -> None:
+            events.append(category.key)
+            print(f"Cleaning: {category.label.for_language(language)}")
+
+        def measure(categories: Sequence[Category]) -> int:
+            self.assertEqual((report.safe[0],), tuple(categories))
+            events.append("measure")
+            return 200
+
+        operations = operations_for_report(report, free_bytes, apply, measure)
+        output = io.StringIO()
+        with redirect_stdout(output), patch.object(commands.sys, "stdin", io.StringIO(plan)):
+            self.assertEqual(0, commands.main(["apply", "--json"], "en", operations))
+
+        result = json.loads(output.getvalue())
+        self.assertEqual({"before_bytes", "after_bytes", "log"}, result.keys())
+        self.assertEqual(1200, result["before_bytes"])
+        self.assertEqual(200, result["after_bytes"])
+        self.assertIn("Cleaning: App caches", result["log"])
+        self.assertIn("Freed in this run: 500.0 B", result["log"])
+        self.assertEqual(["free", "app-caches", "free", "measure"], events)
 
     def test_apply_continues_after_command_failure_and_returns_zero(self) -> None:
         fake_process = FakeCommandRunner(returncode=1)
         fake_files = FakeFileSystem(Path("/Users/example"))
-        operations = failure_operations(
-            fake_files,
-            fake_process,
-        )
+        measure = Mock()
+        operations = replace(failure_operations(fake_files, fake_process), measure_selected=measure)
         output = io.StringIO()
-        with redirect_stdout(output):
-            code = commands.run_apply(
-                json.dumps([category_to_payload(failure_category())]),
-                "en",
-                operations,
-            )
+        plan = json.dumps([category_to_payload(failure_category())])
+        with redirect_stdout(output), patch.object(commands.sys, "stdin", io.StringIO(plan)):
+            code = commands.main(["apply"], "en", operations)
+        measure.assert_not_called()
         self.assertEqual(0, code)
         self.assertEqual([("fake", "cleanup")], fake_process.commands)
         self.assertEqual([Path("/Users/example/cache")], fake_files.removed)
         self.assertIn("failed (1)", output.getvalue())
+        self.assertIn("Freed in this run:", output.getvalue())
+
+    def test_apply_json_reports_the_remaining_size_after_partial_removal(self) -> None:
+        home = Path("/Users/example")
+        removed, remaining = home / "removed", home / "locked"
+
+        class PartiallyLockedFileSystem(FakeFileSystem):
+            def unlink(self, path: Path) -> None:
+                if path == remaining:
+                    raise OSError("locked")
+                super().unlink(path)
+
+        files = PartiallyLockedFileSystem(home, existing=(removed, remaining))
+        process = FakeOutputRunner(f"4\t{remaining}\n")
+        category = Category(
+            "app-caches", localized("Caches"), localized("Regenerable"), 8192,
+            paths=(SizedPath(removed, 4096), SizedPath(remaining, 4096)),
+        )
+        report = report_from_payload(json.loads((FIXTURES / "scan-report.json").read_text()))
+        operations = operations_for_report(
+            report,
+            files.free_bytes,
+            lambda selected, language: runner.clean_category(selected, language, files),
+            lambda selected: measurements.measure_selected_bytes(selected, files, process),
+        )
+        output = io.StringIO()
+        with redirect_stdout(output):
+            code = commands.run_apply(
+                json.dumps([category_to_payload(category)]), "en", operations, json_output=True
+            )
+        self.assertEqual(0, code)
+
+        result = json.loads(output.getvalue())
+        self.assertEqual([removed], files.removed)
+        self.assertEqual({remaining}, files.existing)
+        self.assertEqual(8192, result["before_bytes"])
+        self.assertEqual(4096, result["after_bytes"])
+        self.assertIn("could not remove", result["log"])
 
 
 class ExecutionTests(unittest.TestCase):
@@ -247,12 +335,12 @@ class ProgressTests(unittest.TestCase):
     def test_measurement_uses_fake_process_output_and_preserves_missing_as_none(
         self,
     ) -> None:
-        fake = FakeOutputRunner("4\t/Users/example/a\n")
-        sizes = measurements.measure_bytes(
-            (Path("/Users/example/a"), Path("/tmp")), None, fake
-        )
-        self.assertEqual(4096, sizes[Path("/Users/example/a")])
-        self.assertIsNone(sizes[Path("/tmp")])
+        measured, unreadable = Path("/Users/example/a"), Path("/Users/example/locked")
+        files = FakeFileSystem(Path("/Users/example"), existing=(measured, unreadable))
+        fake = FakeOutputRunner(f"4\t{measured}\n")
+        sizes = measurements.measure_bytes((measured, unreadable), files, fake)
+        self.assertEqual(4096, sizes[measured])
+        self.assertIsNone(sizes[unreadable])
 
     def test_docker_unavailable_is_omitted(self) -> None:
         class UnavailableRunner:
@@ -272,6 +360,79 @@ class ProgressTests(unittest.TestCase):
         self.assertEqual(4096, result.safe[0].size_bytes)
         self.assertIsNone(result.review[0].size_bytes)
         self.assertEqual(77, result.free_bytes)
+
+
+class SelectedMeasurementTests(unittest.TestCase):
+    def test_path_batch_preserves_order_and_counts_every_reference(self) -> None:
+        home = Path("/Users/example")
+        removed, remaining, unselected = home / "removed", home / "remaining", home / "other"
+        files = FakeFileSystem(home, existing=(remaining, unselected))
+        process = FakeOutputRunner(f"4\t{remaining}\n")
+        category = Category(
+            "app-caches", localized("Caches"), localized("Regenerable"), 8192,
+            paths=(SizedPath(removed, 4096), SizedPath(remaining, 4096)),
+        )
+        self.assertEqual(4096, measurements.measure_selected_bytes((category,), files, process))
+        repeated = replace(category, key="other-selected", paths=(SizedPath(remaining, 4096),))
+        self.assertEqual(8192, measurements.measure_selected_bytes((category, repeated), files, process))
+        batch = ("du", "-sk", "--", str(removed), str(remaining))
+        self.assertEqual([batch, batch], process.commands)
+
+    def test_unreadable_selected_path_makes_the_total_unavailable(self) -> None:
+        home = Path("/Users/example")
+        readable, unreadable = home / "readable", home / "unreadable"
+        files = FakeFileSystem(home, existing=(readable, unreadable))
+        process = FakeOutputRunner(f"4\t{readable}\n")
+        selected = Category(
+            "app-caches", localized("Caches"), localized("Regenerable"), 8192,
+            paths=(SizedPath(readable, 4096), SizedPath(unreadable, 4096)),
+        )
+        self.assertIsNone(measurements.measure_selected_bytes((selected,), files, process))
+
+    def test_empty_selection_and_pathless_category_run_no_commands(self) -> None:
+        category = Category("app-caches", localized("Caches"), localized("Regenerable"), 0)
+        process = FakeOutputRunner("")
+        for selected in ((), (category,)):
+            self.assertEqual(0, measurements.measure_selected_bytes(selected, process_runner=process))
+        self.assertEqual([], process.commands)
+
+    def test_docker_counts_only_images_and_build_cache_with_one_query(self) -> None:
+        category = docker.build_docker_category({})
+        process = FakeOutputRunner("Images|2MB\nBuild Cache|1MB\nLocal Volumes|7MB\nContainers|9MB\n")
+        self.assertEqual(
+            6_000_000, measurements.measure_selected_bytes((category, category), process_runner=process)
+        )
+        self.assertEqual([("docker", "system", "df", "--format", docker.DOCKER_DF_FORMAT)], process.commands)
+
+    def test_unavailable_incomplete_or_invalid_docker_measurement(self) -> None:
+        category = docker.build_docker_category({})
+        for process in (
+            FakeOutputRunner("", returncode=1),
+            FakeOutputRunner("Images|2MB\n"),
+            FakeOutputRunner("Images|2MB\nBuild Cache|invalid\n"),
+        ):
+            with self.subTest(stdout=process.stdout, returncode=process.returncode):
+                self.assertIsNone(measurements.measure_selected_bytes((category,), process_runner=process))
+
+    def test_unknown_commands_cannot_be_measured(self) -> None:
+        category = docker.build_docker_category({})
+        process = FakeOutputRunner("")
+        for unknown in (replace(category, key="other"), replace(category, commands=(("other",),))):
+            self.assertIsNone(measurements.measure_selected_bytes((unknown,), process_runner=process))
+        self.assertEqual([], process.commands)
+
+    def test_du_read_errors_make_the_total_unavailable(self) -> None:
+        home = Path("/Users/example")
+        path = home / "remaining"
+        files = FakeFileSystem(home, existing=(path,))
+        process = FakeOutputRunner("invalid size\n")
+        selected = Category(
+            "app-caches", localized("Caches"), localized("Regenerable"), 4096,
+            paths=(SizedPath(path, 4096),),
+        )
+        self.assertIsNone(measurements.measure_selected_bytes((selected,), files, process))
+        with patch.object(process, "run", side_effect=OSError("locked")):
+            self.assertIsNone(measurements.measure_selected_bytes((selected,), files, process))
 
 
 class FormattingTests(unittest.TestCase):

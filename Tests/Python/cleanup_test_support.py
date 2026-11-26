@@ -2,7 +2,7 @@
 
 import io
 import json
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from pathlib import Path
 from typing import cast
 
@@ -50,27 +50,36 @@ class FakeOutputRunner:
     def __init__(self, stdout: str, returncode: int = 0) -> None:
         self.stdout = stdout
         self.returncode = returncode
+        self.commands: list[tuple[str, ...]] = []
 
-    def run(self, _command: tuple[str, ...]) -> FakeCompletedProcess:
+    def run(self, command: Sequence[str]) -> FakeCompletedProcess:
+        self.commands.append(tuple(command))
         return FakeCompletedProcess(self.returncode, stdout=self.stdout)
 
 
 class FakeFileSystem(FileSystem):
     """Named filesystem fake for free-space and deletion tests."""
 
-    def __init__(self, home: Path, free: int = 10) -> None:
+    def __init__(
+        self, home: Path, free: int = 10, *, existing: Iterable[Path] = ()
+    ) -> None:
         super().__init__(home)
         self.free = free
         self.removed: list[Path] = []
+        self.existing = set(existing)
 
     def free_bytes(self) -> int:
         return self.free
 
+    def exists(self, path: Path) -> bool:
+        return path in self.existing
+
     def remove_tree(self, path: Path) -> None:
         self.removed.append(path)
+        self.existing.discard(path)
 
     def unlink(self, path: Path) -> None:
-        self.removed.append(path)
+        self.remove_tree(path)
 
     def is_directory(self, _path: Path) -> bool:
         return False
@@ -143,6 +152,7 @@ def operations_for_report(
     report: Report,
     free_reader: Callable[[], int],
     apply: Callable[[Category, str], None] | None = None,
+    measure_selected: Callable[[Sequence[Category]], int | None] | None = None,
 ) -> commands.CleanupOperations:
     """Build injected operations around one fake report. Example: ``operations_for_report(report, read)``."""
     applier = apply or (lambda _category, _language: None)
@@ -151,6 +161,7 @@ def operations_for_report(
         scan_with_progress=lambda _stream: report,
         free_bytes=free_reader,
         apply=applier,
+        measure_selected=measure_selected or (lambda _categories: None),
     )
 
 

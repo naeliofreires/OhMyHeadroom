@@ -109,10 +109,69 @@ func checkSuccessfulCleanup() async throws {
   await model.scan()
   reader.value = 700
   await model.cleanSelected()
-  try check(model.phase == .finished(log: "done"), "successful cleanup phase")
+  let result = CleanupResult(beforeBytes: 100, afterBytes: 0, log: "done")
+  try check(model.phase == .finished(result: result), "successful cleanup phase")
   try check(model.report == nil && model.selectedKeys.isEmpty, "stale cleanup state retained")
   try check(model.freeBytes == 700, "free space was not refreshed")
   try check(gateway.appliedCategories.map(\.key) == ["caches"], "wrong categories applied")
+}
+
+@MainActor
+func checkCleanupComparison() async throws {
+  let gateway = FakeCleanupGateway(report: makeReport())
+  gateway.afterBytes = 25
+  let reader = FakeFreeSpaceReader(value: 500)
+  let model = CleanupModel(gateway: gateway, freeSpaceReader: reader)
+  await model.scan()
+  try check(model.selectedBytes == 100 && model.freeBytes == 500, "initial selected and free bytes")
+  reader.value = 700
+  await model.cleanSelected()
+  try check(model.report == nil && model.selectedKeys.isEmpty, "stale selection retained")
+  try check(model.freeBytes == 700, "global free space was not refreshed")
+  guard case .finished(let caches) = model.phase else {
+    throw CheckFailure(description: "cache comparison missing")
+  }
+  try check(caches == CleanupResult(beforeBytes: 100, afterBytes: 25, log: "done"),
+            "wrong cache comparison")
+  try check(caches.reductionBytes == 75, "wrong cache reduction")
+
+  await model.scan()
+  try check(model.phase == .ready, "scan retained the previous result")
+  for category in gateway.report.safe { model.toggle(category) }
+  try check(model.selectedKeys == ["deps-projects"], "dependency selection")
+  await model.cleanSelected()
+  try check(model.phase == .finished(result: CleanupResult(beforeBytes: 200, afterBytes: 25, log: "done")),
+            "wrong dependency comparison")
+  model.reset()
+  try check(model.phase == .idle, "reset retained the previous result")
+}
+
+@MainActor
+func checkUnavailableCleanupComparison() async throws {
+  let gateway = FakeCleanupGateway(report: makeReport())
+  gateway.afterBytes = nil
+  let model = CleanupModel(gateway: gateway, freeSpaceReader: FakeFreeSpaceReader(value: 500))
+  await model.scan()
+  await model.cleanSelected()
+  guard case .finished(let result) = model.phase else {
+    throw CheckFailure(description: "unavailable measurement did not finish")
+  }
+  try check(result == CleanupResult(beforeBytes: 100, afterBytes: nil, log: "done"),
+            "wrong unavailable comparison")
+  try check(result.reductionBytes == nil, "unavailable measurement has a reduction")
+}
+
+@MainActor
+func checkCleanupGrowth() async throws {
+  let gateway = FakeCleanupGateway(report: makeReport())
+  gateway.afterBytes = 125
+  let model = CleanupModel(gateway: gateway, freeSpaceReader: FakeFreeSpaceReader(value: 500))
+  await model.scan()
+  await model.cleanSelected()
+  guard case .finished(let result) = model.phase else {
+    throw CheckFailure(description: "growth comparison missing")
+  }
+  try check(result.afterBytes == 125 && result.reductionBytes == -25, "growth comparison was clamped")
 }
 
 @MainActor
@@ -158,4 +217,6 @@ func checkBusyPhases() async throws {
   try check(!model.isConfirmingClean, "confirmation retained while cleaning")
   await gateway.releaseApply()
   await cleanTask.value
+  try check(model.phase == .finished(result: CleanupResult(beforeBytes: 100, afterBytes: 0, log: "done")),
+            "cleanup did not keep the result after release")
 }

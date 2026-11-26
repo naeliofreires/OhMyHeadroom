@@ -2,7 +2,7 @@ import Foundation
 
 protocol CleanupGateway: Sendable {
   func scan(onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport
-  func apply(_ categories: [Category]) async throws -> String
+  func apply(_ categories: [Category]) async throws -> CleanupResult
 }
 
 protocol FreeSpaceReader: Sendable {
@@ -25,7 +25,7 @@ struct LazyCleanupGateway: CleanupGateway {
     return try await gateway.scan(onStep: onStep)
   }
 
-  func apply(_ categories: [Category]) async throws -> String {
+  func apply(_ categories: [Category]) async throws -> CleanupResult {
     let gateway = try resolve()
     return try await gateway.apply(categories)
   }

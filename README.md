@@ -35,8 +35,9 @@ open "$HOME/Applications/OhMyHeadroom.app"
 
 When OhMyHeadroom appears in the menu bar, click **Scan** to see what it found.
 Select the categories you want to clear, then click **Clear…** and confirm.
-The panel shows a progress indicator while the selected files are being removed,
-then displays the cleanup result.
+The panel shows progress while the engine clears the selection and measures what
+remains. The result compares the selected size from the scan with the remaining
+size and shows the execution log.
 
 The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
 shows a report without deleting anything.
@@ -52,8 +53,10 @@ OhMyHeadroom follows the macOS appearance by default and remembers your selectio
 
 The app runs `python3 cleanup.py scan --json --progress` to get a scan report on
 stdout and progress events on stderr. After you confirm a selection, it sends
-the selected categories as JSON on stdin to `python3 cleanup.py apply`. The
-Python engine performs all deletions.
+the selected categories as JSON on stdin to `python3 cleanup.py apply --json`.
+The Python engine performs all deletions and returns the selected sizes before
+and after cleanup, along with the execution log. If the remaining size cannot be
+measured, the result reports it as unavailable.
 
 The product is organized around one `Cleanup` feature. Scanning, selection,
 confirmation, and execution share the same category catalog and report lifecycle.
@@ -126,9 +129,10 @@ python3 cleanup.py clean             # Ask before cleaning each category
 python3 cleanup.py scan --json      # Write the JSON report to stdout
 ```
 
-The app uses `scan --json --progress` for progress events and `apply` to execute a
-confirmed plan. `apply` reads a plan from standard input and runs its commands
-with your permissions. Use it only with trusted input.
+The app uses `scan --json --progress` for progress events and `apply --json` to
+execute a confirmed plan and return the comparison. `apply` reads a plan from
+standard input and runs its commands with your permissions. Use it only with
+trusted input.
 
 ## Safety and permissions
 
@@ -161,7 +165,8 @@ make check
 
 Tests use named fakes for disk operations and external commands. They do not
 scan the home directory, run Docker cleanup, or remove user files. Shared JSON
-fixtures cover report decoding, selected-category encoding, and progress events.
+fixtures cover report decoding, selected-category encoding, cleanup results, and
+progress events.
 Python tests use the standard library; Swift tests use the installed toolchain.
 There are no third-party test dependencies or services to configure.
 

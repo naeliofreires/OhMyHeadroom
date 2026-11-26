@@ -23,6 +23,7 @@ USAGE = Localized(
         "Comandos: scan (padrão), clean, apply (lê um plano da entrada padrão).\n"
         "  scan --json [--progress]  Gera um relatório JSON e, opcionalmente, eventos de progresso.\n"
         "  clean --yes              Limpa sem pedir confirmação.\n"
+        "  apply --json             Executa o plano e retorna a comparação da seleção em JSON.\n"
         "  --lang pt ou --lang en   Escolhe o idioma.\n"
         "  -h, --help               Mostra esta ajuda."
     ),
@@ -31,6 +32,7 @@ USAGE = Localized(
         "Commands: scan (default), clean, apply (reads a plan from standard input).\n"
         "  scan --json [--progress]  Print a JSON report and optional progress events.\n"
         "  clean --yes              Clean without prompting for confirmation.\n"
+        "  apply --json             Apply the plan and return the selected cleanup comparison as JSON.\n"
         "  --lang pt or --lang en   Choose the language.\n"
         "  -h, --help               Show this help."
     ),

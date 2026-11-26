@@ -7,6 +7,7 @@ from pathlib import Path
 from ohmyheadroom_engine.i18n import Localized
 from ohmyheadroom_engine.features.cleanup.cleanup_types import (
     Category,
+    CleanupResult,
     Report,
     SizedPath,
 )
@@ -15,6 +16,11 @@ from ohmyheadroom_engine.features.cleanup.cleanup_types import (
 def report_to_json(report: Report) -> str:
     """Serialize a scan report using the wire format consumed by Swift."""
     return json.dumps(asdict(report), default=str, ensure_ascii=False)
+
+
+def cleanup_result_to_json(result: CleanupResult) -> str:
+    """Serialize the selected cleanup result consumed by Swift."""
+    return json.dumps(asdict(result), ensure_ascii=False)
 
 
 def categories_from_json(text: str) -> tuple[Category, ...]:

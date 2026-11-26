@@ -23,7 +23,14 @@
 "Clearing selected categories…" = "Limpando as categorias selecionadas…";
 "Could not finish" = "Não foi possível concluir";
 "Done" = "Concluído";
-"Rescan to update sizes." = "Meça novamente para atualizar os tamanhos.";
+"Selected cleanup" = "Limpeza selecionada";
+"Before" = "Antes";
+"After" = "Depois";
+"Reduction" = "Redução";
+"Increase" = "Aumento";
+"Unavailable" = "Indisponível";
+"The remaining size could not be measured. See the cleanup log below." = "Não foi possível medir o tamanho restante. Consulte o log da limpeza abaixo.";
+"Scan again to refresh all categories." = "Meça novamente para atualizar todas as categorias.";
 "Safe to clear" = "Seguro para limpar";
 "Quit affected apps before clearing these categories." = "Feche os apps afetados antes de limpar essas categorias.";
 "Selected: %@" = "Selecionado: %@";
