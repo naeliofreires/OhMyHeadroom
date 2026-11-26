@@ -1,7 +1,7 @@
 // Draws the Headroom icon at every size macOS asks for, then packs them with iconutil.
-// Compile this file with Sources/PoliceScan/BrandArtwork.swift.
+// Compile this file with Sources/Headroom/BrandArtwork.swift.
 // Run once from the repository root:
-//   swiftc Sources/PoliceScan/BrandArtwork.swift Tools/make-icon.swift -o /tmp/make-icon
+//   swiftc Sources/Headroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/make-icon
 //   /tmp/make-icon Resources
 import AppKit
 import Foundation

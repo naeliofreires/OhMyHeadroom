@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeVar
 
-from police_scan_engine.features.cleanup.catalog import (
+from headroom_engine.features.cleanup.catalog import (
     DEPENDENCY_DIR_NAMES,
     DEPENDENCY_SCAN_ROOTS,
     HOME,
@@ -15,31 +15,31 @@ from police_scan_engine.features.cleanup.catalog import (
     ReviewRule,
     SafeRule,
 )
-from police_scan_engine.features.cleanup.cleanup_types import (
+from headroom_engine.features.cleanup.cleanup_types import (
     Category,
     Report,
     ReviewLine,
 )
-from police_scan_engine.features.cleanup.scanning.dependencies import (
+from headroom_engine.features.cleanup.scanning.dependencies import (
     DEPENDENCY_SCAN_LABEL,
     build_dependency_categories,
 )
-from police_scan_engine.features.cleanup.scanning.docker import (
+from headroom_engine.features.cleanup.scanning.docker import (
     DOCKER_PROBE_LABEL,
     build_docker_category,
     build_docker_volume_line,
     docker_reclaimable_bytes,
 )
-from police_scan_engine.features.cleanup.scanning.measurements import (
+from headroom_engine.features.cleanup.scanning.measurements import (
     children_of,
     make_category,
     measure_bytes,
     sized_paths,
 )
-from police_scan_engine.features.cleanup.scanning.progress import ProgressReporter
-from police_scan_engine.i18n import Localized
-from police_scan_engine.platform.filesystem import FileSystem
-from police_scan_engine.platform.processes import ProcessRunner
+from headroom_engine.features.cleanup.scanning.progress import ProgressReporter
+from headroom_engine.i18n import Localized
+from headroom_engine.platform.filesystem import FileSystem
+from headroom_engine.platform.processes import ProcessRunner
 
 T = TypeVar("T")
 # du spends its time waiting on the disk, not the CPU, so a few running at once finish sooner.

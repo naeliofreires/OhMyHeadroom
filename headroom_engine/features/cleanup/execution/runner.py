@@ -2,11 +2,11 @@
 
 from pathlib import Path
 
-from police_scan_engine.features.cleanup.catalog import HOME
-from police_scan_engine.features.cleanup.cleanup_types import Category
-from police_scan_engine.i18n import Localized
-from police_scan_engine.platform.filesystem import FileSystem
-from police_scan_engine.platform.processes import ProcessRunner
+from headroom_engine.features.cleanup.catalog import HOME
+from headroom_engine.features.cleanup.cleanup_types import Category
+from headroom_engine.i18n import Localized
+from headroom_engine.platform.filesystem import FileSystem
+from headroom_engine.platform.processes import ProcessRunner
 
 CLEANING = Localized(pt="Limpando: {label}", en="Cleaning: {label}")
 COMMAND_OK = Localized(pt="  ok: {command}", en="  ok: {command}")

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from police_scan_engine.i18n import Localized
+from headroom_engine.i18n import Localized
 
 
 @dataclass(frozen=True)

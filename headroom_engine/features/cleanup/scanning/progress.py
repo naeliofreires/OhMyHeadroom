@@ -9,7 +9,7 @@ import threading
 from dataclasses import asdict
 from typing import TextIO
 
-from police_scan_engine.i18n import Localized
+from headroom_engine.i18n import Localized
 
 
 class ProgressReporter:

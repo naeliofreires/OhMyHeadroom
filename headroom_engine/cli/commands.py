@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Callable, TextIO
 
-from police_scan_engine.cli.presentation import (
+from headroom_engine.cli.presentation import (
     CANCELLED,
     CONFIRM_QUESTION,
     MEASURING_NOTICE,
@@ -16,18 +16,18 @@ from police_scan_engine.cli.presentation import (
     print_freed_space,
     print_report,
 )
-from police_scan_engine.features.cleanup.cleanup_types import Category, Report
-from police_scan_engine.features.cleanup.contracts import (
+from headroom_engine.features.cleanup.cleanup_types import Category, Report
+from headroom_engine.features.cleanup.contracts import (
     categories_from_json,
     report_to_json,
 )
-from police_scan_engine.features.cleanup.execution.runner import clean_category
-from police_scan_engine.features.cleanup.scanning.report import (
+from headroom_engine.features.cleanup.execution.runner import clean_category
+from headroom_engine.features.cleanup.scanning.report import (
     build_report,
     disk_free_bytes,
 )
-from police_scan_engine.features.cleanup.scanning.progress import ProgressReporter
-from police_scan_engine.i18n import resolve_language
+from headroom_engine.features.cleanup.scanning.progress import ProgressReporter
+from headroom_engine.i18n import resolve_language
 
 SCAN_COMMAND = "scan"
 CLEAN_COMMAND = "clean"

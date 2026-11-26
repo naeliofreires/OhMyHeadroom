@@ -2,9 +2,9 @@
 
 import re
 
-from police_scan_engine.features.cleanup.cleanup_types import Category, ReviewLine
-from police_scan_engine.i18n import Localized
-from police_scan_engine.platform.processes import ProcessRunner
+from headroom_engine.features.cleanup.cleanup_types import Category, ReviewLine
+from headroom_engine.i18n import Localized
+from headroom_engine.platform.processes import ProcessRunner
 
 DOCKER_DF_FORMAT = "{{.Type}}|{{.Reclaimable}}"
 DOCKER_SIZE_PATTERN = re.compile(r"^([\d.]+)(B|kB|MB|GB|TB)\b")

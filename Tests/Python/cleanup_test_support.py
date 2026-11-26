@@ -6,19 +6,19 @@ from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import cast
 
-from police_scan_engine.cli import commands
-from police_scan_engine.features.cleanup import contracts
-from police_scan_engine.features.cleanup.catalog import ReviewRule, SafeRule
-from police_scan_engine.features.cleanup.cleanup_types import (
+from headroom_engine.cli import commands
+from headroom_engine.features.cleanup import contracts
+from headroom_engine.features.cleanup.catalog import ReviewRule, SafeRule
+from headroom_engine.features.cleanup.cleanup_types import (
     Category,
     Report,
     ReviewLine,
     SizedPath,
 )
-from police_scan_engine.features.cleanup.execution import runner
-from police_scan_engine.features.cleanup.scanning.report import ScanRuntime
-from police_scan_engine.i18n import Localized
-from police_scan_engine.platform.filesystem import FileSystem
+from headroom_engine.features.cleanup.execution import runner
+from headroom_engine.features.cleanup.scanning.report import ScanRuntime
+from headroom_engine.i18n import Localized
+from headroom_engine.platform.filesystem import FileSystem
 
 FIXTURES = Path(__file__).parents[1] / "Fixtures"
 

@@ -3,19 +3,19 @@
 from collections.abc import Iterator, Sequence
 from pathlib import Path
 
-from police_scan_engine.features.cleanup.catalog import (
+from headroom_engine.features.cleanup.catalog import (
     DEPENDENCY_DIR_NAMES,
     DEPENDENCY_SCAN_ROOTS,
     HOME,
 )
-from police_scan_engine.features.cleanup.cleanup_types import Category, SizedPath
-from police_scan_engine.features.cleanup.scanning.measurements import (
+from headroom_engine.features.cleanup.cleanup_types import Category, SizedPath
+from headroom_engine.features.cleanup.scanning.measurements import (
     make_category,
     sized_paths,
 )
-from police_scan_engine.i18n import Localized
-from police_scan_engine.platform.filesystem import FileSystem
-from police_scan_engine.platform.processes import ProcessRunner
+from headroom_engine.i18n import Localized
+from headroom_engine.platform.filesystem import FileSystem
+from headroom_engine.platform.processes import ProcessRunner
 
 DEPENDENCY_NOTE_PROJECTS = Localized(
     pt="Reinstale com npm install / uv sync antes de rodar o projeto de novo.",

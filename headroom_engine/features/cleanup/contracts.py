@@ -4,8 +4,8 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
-from police_scan_engine.i18n import Localized
-from police_scan_engine.features.cleanup.cleanup_types import (
+from headroom_engine.i18n import Localized
+from headroom_engine.features.cleanup.cleanup_types import (
     Category,
     Report,
     SizedPath,

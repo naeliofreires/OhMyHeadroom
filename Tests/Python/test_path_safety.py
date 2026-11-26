@@ -6,7 +6,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from adapter_fakes import FakeDeletionFileSystem
-from police_scan_engine.features.cleanup.execution.runner import (
+from headroom_engine.features.cleanup.execution.runner import (
     delete_entry,
     is_inside_home,
     remove_path,
