@@ -26,14 +26,28 @@ func checkTrashToggleDefaultSendsTrash() async throws {
 
 @MainActor
 func checkTrashToggleOffSendsPermanent() async throws {
-  let gateway = FakeCleanupGateway(report: makeReport())
-  let model = CleanupModel(gateway: gateway, freeSpaceReader: FakeFreeSpaceReader(value: 500))
+  let transport = try makeRecordingTransport()
+  let model = CleanupModel(gateway: CleanupEngine(transport: transport), freeSpaceReader: FakeFreeSpaceReader(value: 500))
   await model.scan()
   model.movesToTrash = false
   await model.cleanSelected()
-  try check(gateway.appliedPermanentFlags == [true], "trash toggle off: \(gateway.appliedPermanentFlags)")
-  let arguments = CleanupEngine.applyArguments(language: "en", permanent: true)
-  try check(arguments.last == "--permanent", "permanent flag missing from engine arguments")
+  let applyCall = transport.calls.last ?? []
+  try check(applyCall.first == "apply" && applyCall.last == "--permanent", "toggle off did not reach the engine: \(applyCall)")
+}
+
+@MainActor
+func checkEngineApplyOmitsPermanentByDefault() async throws {
+  let transport = try makeRecordingTransport()
+  _ = try await CleanupEngine(transport: transport).apply([], permanent: false)
+  let applyCall = transport.calls.last ?? []
+  try check(applyCall.first == "apply" && !applyCall.contains("--permanent"), "default apply sent permanent: \(applyCall)")
+}
+
+@MainActor
+func makeRecordingTransport() throws -> RecordingEngineTransport {
+  try RecordingEngineTransport(
+    scanReport: makeReport(),
+    applyResult: CleanupResult(beforeBytes: 100, afterBytes: 0, log: "done"))
 }
 
 @MainActor

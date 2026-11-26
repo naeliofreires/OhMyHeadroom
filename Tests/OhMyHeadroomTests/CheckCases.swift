@@ -27,6 +27,7 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("apply arguments add permanent when requested", { try checkApplyArgumentsAddPermanentWhenRequested() }),
     ("trash toggle default sends trash", checkTrashToggleDefaultSendsTrash),
     ("trash toggle off sends permanent", checkTrashToggleOffSendsPermanent),
+    ("engine apply omits permanent by default", checkEngineApplyOmitsPermanentByDefault),
     ("trash note shown while toggle on", { try checkTrashNoteShownWhileToggleOn() }),
     ("trash note hidden while toggle off", { try checkTrashNoteHiddenWhileToggleOff() }),
   ]
