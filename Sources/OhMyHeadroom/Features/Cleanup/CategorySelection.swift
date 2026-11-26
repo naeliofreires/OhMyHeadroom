@@ -46,6 +46,17 @@ struct CategorySelection: Sendable {
     pickedByKey[category.key]?.contains(item) ?? false
   }
 
+  /// The checkbox state of one item: a single path or command is either picked or not.
+  func itemState(_ item: String, in category: Category) -> State {
+    isItemSelected(item, in: category) ? .all : .none
+  }
+
+  /// Only dependency categories pick path by path. The others are cleared or kept whole.
+  /// Example: `CategorySelection.allowsPathPicking(category)`.
+  static func allowsPathPicking(_ category: Category) -> Bool {
+    category.dataKind.group == .dependencies
+  }
+
   /// A fully picked category is cleared. Any other state picks every item.
   mutating func toggleCategory(_ category: Category) {
     if state(of: category) == .all {

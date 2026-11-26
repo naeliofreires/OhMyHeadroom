@@ -136,6 +136,20 @@ func checkUncheckingEveryPathClearsCategory() async throws {
             "every path unchecked still reached the cleanup")
 }
 
+/// Only dependency categories get per-path checkboxes, and an item's checkbox follows its pick.
+@MainActor
+func checkPathPickingLimitedToDependencies() async throws {
+  let dependency = makeDependencyCategory(count: 2)
+  let cache = makeCategory("caches", 100)
+  try check(CategorySelection.allowsPathPicking(dependency), "dependency rows lost path checkboxes")
+  try check(!CategorySelection.allowsPathPicking(cache), "cache rows gained path checkboxes")
+
+  var selection = CategorySelection(categories: [dependency])
+  try check(selection.itemState(pathString(1), in: dependency) == .none, "unpicked path not shown empty")
+  selection.toggleItem(pathString(1), in: dependency)
+  try check(selection.itemState(pathString(1), in: dependency) == .all, "picked path not shown checked")
+}
+
 /// An item that is not in the category must be ignored, or the state would read as full.
 @MainActor
 func checkForeignItemIsIgnored() async throws {

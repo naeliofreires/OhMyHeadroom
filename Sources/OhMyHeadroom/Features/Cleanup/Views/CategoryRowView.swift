@@ -77,21 +77,16 @@ struct CategoryRowView: View {
     }
   }
 
-  /// Dependency categories pick path by path. Other categories are cleared or kept whole.
   @ViewBuilder
   private func pathCheckbox(for item: SizedPath) -> some View {
-    if category.dataKind.group == .dependencies {
+    if CategorySelection.allowsPathPicking(category) {
       Button {
         model.toggleItem(item.path, in: category)
       } label: {
-        SelectionCheckbox(state: pathState(for: item))
+        SelectionCheckbox(state: model.itemState(item.path, in: category))
       }
       .buttonStyle(.plain)
     }
-  }
-
-  private func pathState(for item: SizedPath) -> CategorySelection.State {
-    model.isItemSelected(item.path, in: category) ? .all : .none
   }
 
   @ViewBuilder

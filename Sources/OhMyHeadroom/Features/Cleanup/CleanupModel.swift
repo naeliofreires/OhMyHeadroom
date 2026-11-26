@@ -155,6 +155,10 @@ final class CleanupModel {
     selection.isItemSelected(item, in: category)
   }
 
+  func itemState(_ item: String, in category: Category) -> CategorySelection.State {
+    selection.itemState(item, in: category)
+  }
+
   func toggle(_ category: Category) {
     selection.toggleCategory(category)
   }

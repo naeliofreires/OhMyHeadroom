@@ -33,6 +33,7 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("selected path count summary", checkSelectedPathCountSummary),
     ("unchecking every path clears category", checkUncheckingEveryPathClearsCategory),
     ("foreign item is ignored", checkForeignItemIsIgnored),
+    ("path picking limited to dependencies", checkPathPickingLimitedToDependencies),
     ("confirmation count from model", checkConfirmationCountFromModel),
     ("partial cleanup sends selected paths", checkPartialCleanupSendsSelectedPaths),
     ("selected bytes follow path selection", checkSelectedBytesFollowPathSelection),
