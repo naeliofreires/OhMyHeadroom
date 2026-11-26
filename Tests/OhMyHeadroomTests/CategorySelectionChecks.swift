@@ -119,3 +119,21 @@ func checkCommandCategoryKeepsSize() async throws {
   try check(narrowed[0].commandLines == ["docker image prune -a -f"],
             "command category lost its command")
 }
+
+@MainActor
+func checkSelectedPathCountSummary() async throws {
+  let category = makeDependencyCategory(count: 12)
+  var selection = CategorySelection(categories: [category])
+  try check(selection.pathCountSummary(for: category) == nil, "empty category showed a count")
+
+  selection.toggleCategory(category)
+  try check(selection.pathCountSummary(for: category) == nil, "full category showed a count")
+
+  selection.toggleCategory(category)
+  for index in 1...3 {
+    selection.toggleItem(pathString(index), in: category)
+  }
+  let summary = selection.pathCountSummary(for: category)
+  try check(summary == LocalizedText(pt: "3 de 12 caminhos", en: "3 of 12 paths"),
+            "partial count summary is wrong: \(String(describing: summary))")
+}

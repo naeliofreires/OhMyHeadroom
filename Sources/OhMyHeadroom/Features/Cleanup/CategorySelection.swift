@@ -71,6 +71,18 @@ struct CategorySelection: Sendable {
     categories.compactMap { narrowed($0) }
   }
 
+  /// "3 de 12 caminhos" when only some paths are picked; nil when none or all are.
+  /// Example: `selection.pathCountSummary(for: category)`.
+  func pathCountSummary(for category: Category) -> LocalizedText? {
+    let total = category.paths.count
+    let selected = category.paths.filter { isItemSelected($0.path, in: category) }.count
+    if selected == 0 || selected == total { return nil }
+    return LocalizedText(
+      pt: "\(selected) de \(total) caminhos",
+      en: "\(selected) of \(total) paths"
+    )
+  }
+
   private func narrowed(_ category: Category) -> Category? {
     let picked = pickedByKey[category.key] ?? []
     let paths = category.paths.filter { picked.contains($0.path) }
