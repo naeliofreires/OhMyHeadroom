@@ -17,5 +17,8 @@ struct MenuPanelView: View {
       }
       // Top-aligned: a centred stack would float the header down when the content is short.
       .frame(width: 500, height: 580)
+      .task {
+        await model.checkForUpdatesIfNeeded()
+      }
   }
 }

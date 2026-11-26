@@ -13,6 +13,14 @@
 "Working" = "Trabalhando";
 "Quit OhMyHeadroom" = "Sair do OhMyHeadroom";
 "More options" = "Mais opções";
+"Update available (%@)" = "Atualização disponível (%@)";
+"Open on GitHub" = "Abrir no GitHub";
+"Copy update command" = "Copiar comando de atualização";
+"Check for updates" = "Verificar atualizações";
+"Checking for updates…" = "Verificando atualizações…";
+"Up to date" = "Atualizado";
+"Could not check for updates" = "Não foi possível verificar atualizações";
+"Version %@" = "Versão %@";
 "Language" = "Idioma";
 "Theme" = "Tema";
 "System" = "Sistema";

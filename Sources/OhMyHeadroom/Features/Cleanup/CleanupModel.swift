@@ -14,21 +14,38 @@ final class CleanupModel {
     case failed(message: String)
   }
 
+  enum UpdateStatus: Equatable {
+    case idle
+    case checking
+    case upToDate
+    case available(AppUpdate)
+    case unavailable
+  }
+
   private let gateway: any CleanupGateway
   private let freeSpaceReader: any FreeSpaceReader
+  private let updateChecker: any UpdateChecking
+  private let updateCooldown: TimeInterval
+  private var lastUpdateCheckAt: Date?
   private(set) var phase: Phase = .idle
   private(set) var report: ScanReport?
   private(set) var selectedKeys: Set<String> = []
   private(set) var expandedKeys: Set<String> = []
+  private(set) var updateStatus: UpdateStatus = .idle
   /// Held here rather than in a view's @State: the Command Line Tools cannot expand @State.
   var isConfirmingClean = false
   private(set) var freeBytes: Int?
 
   init(
-    gateway: any CleanupGateway, freeSpaceReader: any FreeSpaceReader = FileSystemFreeSpaceReader()
+    gateway: any CleanupGateway,
+    freeSpaceReader: any FreeSpaceReader = FileSystemFreeSpaceReader(),
+    updateChecker: any UpdateChecking = NoopUpdateChecker(),
+    updateCooldown: TimeInterval = 900
   ) {
     self.gateway = gateway
     self.freeSpaceReader = freeSpaceReader
+    self.updateChecker = updateChecker
+    self.updateCooldown = updateCooldown
     freeBytes = freeSpaceReader.currentFreeBytes()
   }
 
@@ -70,6 +87,46 @@ final class CleanupModel {
   var menuBarTitle: String {
     guard let freeBytes else { return "OhMyHeadroom" }
     return String(localized: "\(ByteFormat.text(freeBytes)) free", bundle: AppLanguage.current.stringsBundle)
+  }
+
+  var availableUpdate: AppUpdate? {
+    if case .available(let update) = updateStatus { return update }
+    return nil
+  }
+
+  var installedVersionLabel: String {
+    updateChecker.installedVersionLabel
+  }
+
+  func checkForUpdatesIfNeeded(now: Date = Date()) async {
+    guard availableUpdate == nil, updateStatus != .checking else { return }
+    if let lastUpdateCheckAt, now.timeIntervalSince(lastUpdateCheckAt) < updateCooldown {
+      return
+    }
+    lastUpdateCheckAt = now
+    if case .available(let update) = await updateChecker.checkForUpdate() {
+      updateStatus = .available(update)
+    }
+  }
+
+  func checkForUpdatesNow(now: Date = Date()) async {
+    guard updateStatus != .checking else { return }
+    updateStatus = .checking
+    lastUpdateCheckAt = now
+    switch await updateChecker.checkForUpdate() {
+    case .available(let update):
+      updateStatus = .available(update)
+    case .upToDate:
+      updateStatus = .upToDate
+    case .unavailable:
+      updateStatus = .unavailable
+    }
+  }
+
+  func dismissUpdateNotice() {
+    if updateStatus == .upToDate || updateStatus == .unavailable {
+      updateStatus = .idle
+    }
   }
 
   func isSelected(_ category: Category) -> Bool {
