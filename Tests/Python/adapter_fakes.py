@@ -120,6 +120,10 @@ class FakeTrashFileSystem(FileSystem):
         """Return whether the configured path is present."""
         return path in self.existing
 
+    def lexists(self, path: Path) -> bool:
+        """Return whether the configured path is present, as the adapter counts links."""
+        return path in self.existing
+
     def move(self, source: Path, destination: Path) -> None:
         """Record a move and keep the destination present."""
         self.moves.append((source, destination))

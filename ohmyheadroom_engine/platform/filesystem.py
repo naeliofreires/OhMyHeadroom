@@ -34,6 +34,10 @@ class FileSystem:
         """Report whether a path exists."""
         return path.exists()
 
+    def lexists(self, path: Path) -> bool:
+        """Report whether a path exists, counting a dangling symbolic link as present."""
+        return os.path.lexists(path)
+
     def is_symlink(self, path: Path) -> bool:
         """Report whether a path is a symbolic link."""
         return path.is_symlink()

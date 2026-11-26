@@ -20,6 +20,10 @@ HOME = Path("/home/test")
 class RejectingMoveFileSystem(FakeTrashFileSystem):
     """Named fake whose moves always fail, as on a volume the Trash cannot reach."""
 
+    def __init__(self, home: Path, present: set[Path] | None = None) -> None:
+        super().__init__(home)
+        self.existing = set(present or set())
+
     def move(self, source: Path, destination: Path) -> None:
         """Refuse the move with a host-style error."""
         raise OSError("Resource busy")
@@ -62,15 +66,44 @@ class TrashRunnerTests(unittest.TestCase):
         self.assertEqual([], filesystem.removals)
 
     def test_failed_move_keeps_path_and_reports_it(self) -> None:
-        filesystem = RejectingMoveFileSystem(HOME)
         path = HOME / "cache"
+        filesystem = RejectingMoveFileSystem(HOME, {path})
         output = io.StringIO()
 
         with redirect_stdout(output):
             remove_path(path, "en", filesystem, DeleteMode.TRASH)
 
         self.assertEqual([], filesystem.removals)
-        self.assertIn("could not move to the Trash", output.getvalue())
+        self.assertIn(
+            f"  could not move to the Trash: {path}: Resource busy", output.getvalue()
+        )
+
+    def test_vanished_path_reports_could_not_remove(self) -> None:
+        filesystem = RejectingMoveFileSystem(HOME)
+        path = HOME / "gone"
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            remove_path(path, "en", filesystem)
+
+        self.assertEqual([], filesystem.removals)
+        self.assertIn(f"  could not remove {path}: Resource busy", output.getvalue())
+
+    def test_portuguese_trash_lines_are_localized(self) -> None:
+        path = HOME / "cache"
+        moved_output = io.StringIO()
+        failed_output = io.StringIO()
+
+        with redirect_stdout(moved_output):
+            remove_path(path, "pt", FakeTrashFileSystem(HOME))
+        with redirect_stdout(failed_output):
+            remove_path(path, "pt", RejectingMoveFileSystem(HOME, {path}))
+
+        self.assertIn(f"  movido para a Lixeira: {path}", moved_output.getvalue())
+        self.assertIn(
+            f"  não foi possível mover para a Lixeira: {path}: Resource busy",
+            failed_output.getvalue(),
+        )
 
     def test_moved_path_prints_trash_line(self) -> None:
         filesystem = FakeTrashFileSystem(HOME)
@@ -80,7 +113,7 @@ class TrashRunnerTests(unittest.TestCase):
         with redirect_stdout(output):
             remove_path(path, "en", filesystem)
 
-        self.assertIn(f"moved to the Trash: {path}", output.getvalue())
+        self.assertIn(f"  moved to the Trash: {path}", output.getvalue())
 
     def test_path_outside_home_is_not_moved(self) -> None:
         filesystem = FakeTrashFileSystem(HOME)

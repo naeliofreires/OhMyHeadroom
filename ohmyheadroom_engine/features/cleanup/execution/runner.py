@@ -121,9 +121,18 @@ def move_to_trash_reporting(path: Path, language: str, adapter: FileSystem) -> N
     try:
         move_to_trash(path, adapter)
     except OSError as error:
-        print(PATH_NOT_MOVED.render(language, path=str(path), error=str(error)))
+        print(failed_move_message(path, language, adapter, error))
         return
     print(PATH_MOVED.render(language, path=str(path)))
+
+
+def failed_move_message(
+    path: Path, language: str, adapter: FileSystem, error: OSError
+) -> str:
+    """Name a vanished path as not removed, any other failure as not moved. Example: ``failed_move_message(path, 'en', fs, error)``."""
+    if not adapter.lexists(path):
+        return PATH_NOT_DELETED.render(language, path=str(path), error=str(error))
+    return PATH_NOT_MOVED.render(language, path=str(path), error=str(error))
 
 
 def delete_entry(path: Path, filesystem: FileSystem | None = None) -> None:

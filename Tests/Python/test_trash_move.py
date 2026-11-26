@@ -29,6 +29,29 @@ class TrashMoveTests(unittest.TestCase):
 
         self.assertEqual([HOME / ".Trash"], filesystem.created_directories)
 
+    def test_moves_to_free_name_when_trash_already_holds_the_name(self) -> None:
+        filesystem = FakeTrashFileSystem(HOME)
+        filesystem.existing.add(HOME / ".Trash" / "node_modules")
+        path = HOME / "project" / "node_modules"
+
+        destination = move_to_trash(path, filesystem)
+
+        self.assertEqual(HOME / ".Trash" / "node_modules 2", destination)
+        self.assertEqual([(path, destination)], filesystem.moves)
+
+    def test_dangling_link_in_trash_still_blocks_its_name(self) -> None:
+        with tempfile.TemporaryDirectory() as workspace:
+            home = Path(workspace)
+            trash = home / ".Trash"
+            trash.mkdir()
+            (trash / "cache").symlink_to(home / "missing-target")
+            (home / "cache").mkdir()
+
+            destination = move_to_trash(home / "cache", FileSystem(home))
+
+            self.assertEqual(trash / "cache 2", destination)
+            self.assertTrue(destination.is_dir())
+
     def test_symbolic_link_is_moved_as_link_and_target_stays(self) -> None:
         with tempfile.TemporaryDirectory() as workspace:
             home = Path(workspace)
