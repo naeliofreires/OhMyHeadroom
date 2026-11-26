@@ -35,6 +35,8 @@ open "$HOME/Applications/OhMyHeadroom.app"
 
 When OhMyHeadroom appears in the menu bar, click **Scan** to see what it found.
 Select the categories you want to clear, then click **Clear…** and confirm.
+The panel shows a progress indicator while the selected files are being removed,
+then displays the cleanup result.
 
 The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
 shows a report without deleting anything.

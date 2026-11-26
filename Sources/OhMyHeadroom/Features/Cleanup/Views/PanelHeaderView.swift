@@ -50,7 +50,7 @@ struct PanelHeaderView: View {
     }
     .buttonStyle(.bordered)
     .keyboardShortcut("r")
-    .disabled(model.isBusy)
+    .disabled(model.isBusy || model.isConfirmingClean)
   }
 
   private var optionsMenu: some View {
