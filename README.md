@@ -118,6 +118,7 @@ worktrees, MeetingMind and WhatsApp data, Downloads, Movies, and Trash.
 ## Command-line usage
 
 ```sh
+python3 cleanup.py --help           # Show command-line usage
 python3 cleanup.py scan              # Show the report without deleting anything
 python3 cleanup.py clean             # Ask before cleaning each category
 python3 cleanup.py scan --json      # Write the JSON report to stdout

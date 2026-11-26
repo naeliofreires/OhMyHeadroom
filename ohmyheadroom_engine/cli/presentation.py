@@ -18,8 +18,22 @@ MEASURING_NOTICE = Localized(
     en="Measuring the disk (1 to 3 minutes the first time)...",
 )
 USAGE = Localized(
-    pt="Comandos: scan | scan --json | clean | clean --yes | apply. Use --lang pt ou --lang en.",
-    en="Commands: scan | scan --json | clean | clean --yes | apply. Use --lang pt or --lang en.",
+    pt=(
+        "Uso: python3 cleanup.py [comando] [opções]\n"
+        "Comandos: scan (padrão), clean, apply (lê um plano da entrada padrão).\n"
+        "  scan --json [--progress]  Gera um relatório JSON e, opcionalmente, eventos de progresso.\n"
+        "  clean --yes              Limpa sem pedir confirmação.\n"
+        "  --lang pt ou --lang en   Escolhe o idioma.\n"
+        "  -h, --help               Mostra esta ajuda."
+    ),
+    en=(
+        "Usage: python3 cleanup.py [command] [options]\n"
+        "Commands: scan (default), clean, apply (reads a plan from standard input).\n"
+        "  scan --json [--progress]  Print a JSON report and optional progress events.\n"
+        "  clean --yes              Clean without prompting for confirmation.\n"
+        "  --lang pt or --lang en   Choose the language.\n"
+        "  -h, --help               Show this help."
+    ),
 )
 REFUSED_PLAN = Localized(
     pt="Plano recusado, nenhuma limpeza foi realizada: {error}",

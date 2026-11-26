@@ -68,6 +68,24 @@ class ContractTests(unittest.TestCase):
 
 
 class CommandTests(unittest.TestCase):
+    def test_help_prints_localized_usage_without_running_commands(self) -> None:
+        for argv, language, heading in (
+            (["--help"], "en", "Usage:"),
+            (["-h"], "pt", "Uso:"),
+            (["scan", "--json", "--help"], "en", "Usage:"),
+            (["clean", "--yes", "--help"], "en", "Usage:"),
+            (["apply", "--help"], "en", "Usage:"),
+        ):
+            with self.subTest(argv=argv, language=language):
+                output = io.StringIO()
+                with redirect_stdout(output), patch.object(
+                    commands, "build_report", side_effect=AssertionError("scan called")
+                ), patch.object(commands.sys, "stdin") as stdin:
+                    stdin.read.side_effect = AssertionError("plan read")
+                    self.assertEqual(0, commands.main(argv, language))
+                self.assertTrue(output.getvalue().startswith(heading))
+                self.assertIn("python3 cleanup.py", output.getvalue())
+
     def test_unknown_command_returns_two_without_scanning(self) -> None:
         output = io.StringIO()
         with redirect_stdout(output), patch.object(
