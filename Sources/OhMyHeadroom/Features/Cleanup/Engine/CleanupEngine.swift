@@ -68,10 +68,20 @@ struct CleanupEngine: CleanupGateway, Sendable {
     return try EngineJSON.decoder().decode(ScanReport.self, from: output)
   }
 
+  /// Builds the `apply` arguments. Example: `CleanupEngine.applyArguments(language: "en", permanent: true)`.
+  static func applyArguments(language: String, permanent: Bool) -> [String] {
+    var arguments = ["apply", "--json", "--lang", language]
+    if permanent {
+      arguments.append("--permanent")
+    }
+    return arguments
+  }
+
   /// Sends the selected categories and decodes the comparison and execution log.
-  func apply(_ categories: [Category]) async throws -> CleanupResult {
+  func apply(_ categories: [Category], permanent: Bool) async throws -> CleanupResult {
     let input = try EngineJSON.encoder().encode(categories)
-    let arguments = ["apply", "--json", "--lang", AppLanguage.current.engineCode]
+    let arguments = Self.applyArguments(
+      language: AppLanguage.current.engineCode, permanent: permanent)
     let output = try await run(arguments: arguments, input: input, onStep: nil)
     return try EngineJSON.decoder().decode(CleanupResult.self, from: output)
   }

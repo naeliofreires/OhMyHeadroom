@@ -191,7 +191,7 @@ final class CleanupModel {
     isConfirmingClean = false
     phase = .cleaning
     do {
-      let result = try await gateway.apply(picked)
+      let result = try await gateway.apply(picked, permanent: false)
       phase = .finished(result: result)
     } catch {
       phase = .failed(message: error.localizedDescription)

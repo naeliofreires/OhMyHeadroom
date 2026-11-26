@@ -23,6 +23,8 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("lazy gateway resolution", checkLazyResolution),
     ("data classification and expansion", checkDataClassificationAndExpansion),
     ("update indicator and cooldown", checkUpdateIndicatorAndCooldown),
+    ("apply arguments omit permanent by default", { try checkApplyArgumentsOmitPermanentByDefault() }),
+    ("apply arguments add permanent when requested", { try checkApplyArgumentsAddPermanentWhenRequested() }),
   ]
 }
 

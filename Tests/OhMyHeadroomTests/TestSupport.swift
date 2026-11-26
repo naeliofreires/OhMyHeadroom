@@ -16,6 +16,7 @@ final class FakeCleanupGateway: CleanupGateway, @unchecked Sendable {
   var applyError: Error?
   var afterBytes: Int? = 0
   var appliedCategories: [Category] = []
+  var appliedPermanentFlags: [Bool] = []
   var applyCallCount = 0
   var progressStep: ScanStep?
 
@@ -29,10 +30,11 @@ final class FakeCleanupGateway: CleanupGateway, @unchecked Sendable {
     return report
   }
 
-  func apply(_ categories: [Category]) async throws -> CleanupResult {
+  func apply(_ categories: [Category], permanent: Bool) async throws -> CleanupResult {
     applyCallCount += 1
     if let applyError { throw applyError }
     appliedCategories = categories
+    appliedPermanentFlags.append(permanent)
     return CleanupResult(
       beforeBytes: categories.reduce(0) { $0 + $1.sizeBytes }, afterBytes: afterBytes, log: "done"
     )
@@ -103,7 +105,7 @@ actor BlockingCleanupGateway: CleanupGateway {
     return await withCheckedContinuation { scanContinuation = $0 }
   }
 
-  func apply(_ categories: [Category]) async throws -> CleanupResult {
+  func apply(_ categories: [Category], permanent: Bool) async throws -> CleanupResult {
     eventContinuation.yield("apply")
     let result = CleanupResult(
       beforeBytes: categories.reduce(0) { $0 + $1.sizeBytes }, afterBytes: 0, log: "done"
