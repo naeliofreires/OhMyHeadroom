@@ -19,6 +19,7 @@ final class CleanupModel {
   private(set) var phase: Phase = .idle
   private(set) var report: ScanReport?
   private(set) var selectedKeys: Set<String> = []
+  private(set) var expandedKeys: Set<String> = []
   /// Held here rather than in a view's @State: the Command Line Tools cannot expand @State.
   var isConfirmingClean = false
   private(set) var freeBytes: Int?
@@ -43,10 +44,19 @@ final class CleanupModel {
     guard canReset else { return }
     report = nil
     selectedKeys = []
+    expandedKeys = []
     currentStep = nil
     isConfirmingClean = false
     freeBytes = freeSpaceReader.currentFreeBytes()
     phase = .idle
+  }
+
+  var automaticCategories: [Category] {
+    report?.safe.filter { $0.dataKind.group == .automatic } ?? []
+  }
+
+  var dependencyCategories: [Category] {
+    report?.safe.filter { $0.dataKind.group == .dependencies } ?? []
   }
 
   var selectedCategories: [Category] {
@@ -74,6 +84,18 @@ final class CleanupModel {
     }
   }
 
+  func isExpanded(_ category: Category) -> Bool {
+    expandedKeys.contains(category.key)
+  }
+
+  func toggleExpanded(_ category: Category) {
+    if expandedKeys.contains(category.key) {
+      expandedKeys.remove(category.key)
+    } else {
+      expandedKeys.insert(category.key)
+    }
+  }
+
   /// The folder being measured right now, shown by the scan animation.
   private(set) var currentStep: ScanStep?
 
@@ -97,6 +119,7 @@ final class CleanupModel {
       }
       report = fresh
       selectedKeys = Set(fresh.safe.filter { !$0.isOffByDefault }.map(\.key))
+      expandedKeys = []
       freeBytes = fresh.freeBytes
       phase = .ready
     } catch {
@@ -118,6 +141,7 @@ final class CleanupModel {
     }
     report = nil
     selectedKeys = []
+    expandedKeys = []
     freeBytes = freeSpaceReader.currentFreeBytes()
   }
 }

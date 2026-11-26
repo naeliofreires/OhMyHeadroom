@@ -19,28 +19,68 @@ struct ReviewLinesSection: View {
   }
 }
 
-/// One review-only line: label and size, the note on what it holds, and an optional Finder link.
+/// One review-only line arranged with the same hierarchy: title and size, status badge, description, and folder path.
 struct ReviewRowView: View {
   let line: ReviewLine
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
-      LabeledContent(line.label.text) {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        Text(line.label.text)
+          .font(.system(.body, weight: .semibold))
+          .foregroundStyle(.primary)
+          .fixedSize(horizontal: false, vertical: true)
+        Spacer(minLength: 8)
         Text(ByteFormat.text(line.sizeBytes))
+          .font(.system(.body, weight: .semibold))
           .monospacedDigit()
           .foregroundStyle(.secondary)
+          .fixedSize()
       }
+
+      HStack(spacing: 6) {
+        Text("Keep or review")
+          .font(.caption2.weight(.semibold))
+          .foregroundStyle(.secondary)
+          .padding(.horizontal, 6)
+          .padding(.vertical, 2)
+          .background(Color.secondary.opacity(0.14), in: Capsule())
+          .fixedSize()
+        Text("Not deleted automatically")
+          .font(.caption2)
+          .foregroundStyle(.tertiary)
+      }
+
       Text(line.note.text)
         .font(.caption)
         .foregroundStyle(.secondary)
-      if let folder = line.folder {
-        Button("Show in Finder", systemImage: "folder") {
-          revealInFinder(folder)
+        .fixedSize(horizontal: false, vertical: true)
+
+      if let folder = line.folder, let displayFolder = line.displayFolder {
+        TargetContainer {
+          HStack(spacing: 6) {
+            Image(systemName: "folder")
+              .font(.caption2)
+              .foregroundStyle(.tertiary)
+              .accessibilityHidden(true)
+            Text(verbatim: displayFolder)
+              .font(.system(.caption, design: .monospaced))
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .truncationMode(.middle)
+              .help(displayFolder)
+            Spacer(minLength: 8)
+            Button("Show in Finder") {
+              revealInFinder(folder)
+            }
+            .buttonStyle(.link)
+            .font(.caption)
+            .fixedSize()
+          }
         }
-        .buttonStyle(.link)
-        .font(.caption)
       }
     }
+    .padding(.vertical, 2)
   }
 
   private func revealInFinder(_ folder: String) {

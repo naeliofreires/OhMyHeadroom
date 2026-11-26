@@ -41,11 +41,46 @@ struct PhaseContentView: View {
 
   private var confirmationView: some View {
     let size = ByteFormat.text(model.selectedBytes)
-    return VStack(spacing: 12) {
+    let selected = model.selectedCategories
+    return VStack(spacing: 14) {
       Text("Clear selected categories (\(size))?")
         .font(.headline)
+        .multilineTextAlignment(.center)
+
+      ScrollView {
+        VStack(alignment: .leading, spacing: 8) {
+          ForEach(selected) { category in
+            HStack(spacing: 8) {
+              DataKindPill(kind: category.dataKind)
+              Text(category.label.text)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+              Spacer(minLength: 8)
+              Text(ByteFormat.text(category.sizeBytes))
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .fixedSize()
+            }
+          }
+        }
+        .padding(10)
+      }
+      .frame(maxHeight: 200)
+      .background(
+        Color.primary.opacity(0.04),
+        in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+      )
+      .overlay(
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+          .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+      )
+
       Text("Files in the selected categories will be removed. Apps recreate caches. Reinstall dependencies after cleanup.")
+        .font(.caption)
         .foregroundStyle(.secondary)
+        .multilineTextAlignment(.center)
+
       HStack(spacing: 12) {
         Button("Cancel", role: .cancel) {
           model.isConfirmingClean = false
@@ -59,8 +94,7 @@ struct PhaseContentView: View {
         .tint(.red)
       }
     }
-    .multilineTextAlignment(.center)
-    .padding(.horizontal, 32)
+    .padding(.horizontal, 28)
   }
 
   private func workingView(_ message: LocalizedStringKey) -> some View {

@@ -159,3 +159,76 @@ func checkBusyPhases() async throws {
   await gateway.releaseApply()
   await cleanTask.value
 }
+
+@MainActor
+func checkDataClassificationAndExpansion() async throws {
+  let defaults = UserDefaults.standard
+  let key = AppLanguage.preferenceKey
+  let previous = defaults.string(forKey: key)
+  defer { defaults.set(previous, forKey: key) }
+  defaults.set(AppLanguage.english.rawValue, forKey: key)
+
+  let paths = [
+    SizedPath(path: "/Users/test/a", sizeBytes: 40),
+    SizedPath(path: "/Users/test/b", sizeBytes: 30),
+    SizedPath(path: "/Users/test/c", sizeBytes: 20),
+    SizedPath(path: "/Users/test/d", sizeBytes: 10),
+  ]
+  let appCache = Category(
+    key: "app-caches",
+    label: makeText("App caches"),
+    note: makeText("Recreated"),
+    sizeBytes: 100,
+    paths: paths,
+    commands: []
+  )
+  let docker = Category(
+    key: "docker-prune",
+    label: makeText("Docker"),
+    note: makeText("Images"),
+    sizeBytes: 50,
+    paths: [],
+    commands: [["docker", "image", "prune", "-a", "-f"]]
+  )
+  let worktreeDeps = Category(
+    key: "deps-worktrees",
+    label: makeText("Worktree deps"),
+    note: makeText("Reinstall"),
+    sizeBytes: 200,
+    paths: [],
+    commands: []
+  )
+  let report = ScanReport(safe: [appCache, docker, worktreeDeps], review: [], freeBytes: 500)
+  let model = CleanupModel(
+    gateway: FakeCleanupGateway(report: report),
+    freeSpaceReader: FakeFreeSpaceReader(value: 500)
+  )
+  await model.scan()
+
+  try check(model.automaticCategories.map(\.key) == ["app-caches", "docker-prune"],
+            "automatic group mismatch")
+  try check(model.dependencyCategories.map(\.key) == ["deps-worktrees"],
+            "dependency group mismatch")
+  try check(appCache.dataKind == .appCache && appCache.dataKind.badge.en == "App cache",
+            "app cache badge")
+  try check(worktreeDeps.dataKind == .worktreeDependencies && worktreeDeps.dataKind.group == .dependencies,
+            "worktree deps kind")
+  try check(docker.commandLines == ["docker image prune -a -f"], "docker command formatting")
+  try check(appCache.hasMorePaths && appCache.visiblePaths(expanded: false).count == 3,
+            "preview path limit")
+  try check(appCache.visiblePaths(expanded: true).count == 4, "expanded path count")
+
+  model.toggleExpanded(appCache)
+  try check(model.isExpanded(appCache), "category did not expand")
+  model.toggleExpanded(appCache)
+  try check(!model.isExpanded(appCache), "category did not collapse")
+  model.toggleExpanded(appCache)
+  model.reset()
+  try check(!model.isExpanded(appCache), "reset did not clear expanded state")
+
+  let home = "/Users/example"
+  try check(PathDisplay.abbreviate("/Users/example/Library/Caches", home: home) == "~/Library/Caches",
+            "home abbreviation")
+  try check(PathDisplay.abbreviate("/var/log/system.log", home: home) == "/var/log/system.log",
+            "non-home path abbreviation")
+}

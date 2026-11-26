@@ -16,6 +16,6 @@ struct MenuPanelView: View {
         }
       }
       // Top-aligned: a centred stack would float the header down when the content is short.
-      .frame(width: 460, height: 560)
+      .frame(width: 500, height: 580)
   }
 }

@@ -26,6 +26,15 @@
 "Rescan to update sizes." = "Meça novamente para atualizar os tamanhos.";
 "Safe to clear" = "Seguro para limpar";
 "Quit affected apps before clearing these categories." = "Feche os apps afetados antes de limpar essas categorias.";
+"Caches & temporary data" = "Caches e arquivos temporários";
+"Recreated automatically or re-downloaded when needed. Quit affected apps first." = "Recriados automaticamente ou baixados de novo quando necessário. Feche os apps afetados antes.";
+"Dependencies & builds" = "Dependências e builds";
+"Unchecked by default. Reinstall dependencies or rebuild before running these projects." = "Desmarcado por padrão. Reinstale as dependências ou gere o build novamente antes de rodar esses projetos.";
+"Show fewer paths" = "Mostrar menos caminhos";
+"Show all %@ paths" = "Mostrar todos os %@ caminhos";
+"No items found in this category." = "Nenhum item encontrado nesta categoria.";
+"Keep or review" = "Manter ou revisar";
+"Not deleted automatically" = "Não é removido automaticamente";
 "Selected: %@" = "Selecionado: %@";
 "Clear…" = "Limpar…";
 "Clear selected categories (%@)?" = "Limpar as categorias selecionadas (%@)?";
