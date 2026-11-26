@@ -19,15 +19,25 @@ fi
 
 swift build -c release
 
-rm -rf "$app"
-mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
-cp .build/release/Headroom "$app/Contents/MacOS/Headroom"
-cp Info.plist "$app/Contents/Info.plist"
-cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
-cp -R .build/release/Headroom_Headroom.bundle "$app/Contents/Resources/"
+mkdir -p "$HOME/Applications"
+staging="$(mktemp -d "$HOME/Applications/.headroom.XXXXXXXX")"
+trap 'rm -rf "$staging"' EXIT
+staged_app="$staging/Headroom.app"
+contents="$staged_app/Contents"
+engine="$contents/Resources/Engine"
+mkdir -p "$contents/MacOS" "$engine"
+cp .build/release/Headroom "$contents/MacOS/Headroom"
+cp Info.plist "$contents/Info.plist"
+cp Resources/AppIcon.icns "$contents/Resources/AppIcon.icns"
+cp -R .build/release/Headroom_Headroom.bundle "$contents/Resources/"
 # One Localizable.strings per language; SwiftUI picks the one that matches the system language.
-cp -R Localization/*.lproj "$app/Contents/Resources/"
-# Ad-hoc signature: enough for a local build on this Mac, not for distribution.
-codesign --force --sign - "$app"
+cp -R Localization/*.lproj "$contents/Resources/"
+cp cleanup.py "$engine/"
+rsync -r --exclude='__pycache__/' --exclude='*.pyc' headroom_engine "$engine/"
+# Ad-hoc signature for a local build.
+codesign --force --sign - "$staged_app"
+
+rm -rf "$app"
+mv "$staged_app" "$app"
 
 echo "Installed at: $app"

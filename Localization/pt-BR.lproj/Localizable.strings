@@ -32,5 +32,5 @@
 "These items are never deleted." = "Estes itens nunca são apagados pelo app.";
 "Show in Finder" = "Mostrar no Finder";
 "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin." = "Python 3 não encontrado em /opt/homebrew/bin nem em /usr/local/bin.";
-"The engine was not found at %@. It should be in the Headroom folder." = "Motor não encontrado em %@. Ele deveria estar na pasta Headroom.";
+"The engine was not found at %@. Reinstall Headroom to restore it." = "Motor não encontrado em %@. Reinstale o Headroom para restaurá-lo.";
 "The engine failed with code %@: %@" = "O motor falhou com código %@: %@";

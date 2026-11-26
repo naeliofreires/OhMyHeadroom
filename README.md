@@ -7,6 +7,32 @@ category could free and deletes only the categories you select.
 - **Headroom.app**: a SwiftUI menu bar app with scan progress and a confirmation step.
 - **`cleanup.py`**: the command-line interface, using the same engine as the app.
 
+## Install from source
+
+- macOS 26 or later and the Swift toolchain from Xcode Command Line Tools.
+- Python 3.10 or later. The menu bar app looks for `python3` in
+  `/opt/homebrew/bin` and `/usr/local/bin`.
+- Docker is optional. Docker entries are omitted when Docker is unavailable.
+
+```sh
+git clone https://github.com/naeliofreires/Headroom.git
+cd Headroom
+./build-app.sh
+open "$HOME/Applications/Headroom.app"
+```
+
+The script builds and signs a local copy of the app and bundles the Python engine.
+You can move or remove the checkout after installation. When Headroom appears in
+the menu bar, click **Scan** to see what it found. Select the categories you want
+to remove, then click **Delete…** and confirm.
+
+The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
+shows a report without deleting anything.
+
+Headroom supports English and Brazilian Portuguese. The app follows the system
+language by default. Use **More options (…) → Language** to change it, or pass
+`--lang pt` or `--lang en` to the CLI.
+
 ## How it works
 
 The app runs `python3 cleanup.py scan --json --progress` to get a scan report on
@@ -69,61 +95,24 @@ flowchart TD
 | Worktree dependencies | `node_modules`, `.venv`, `.next`, `.turbo`, and `__pycache__` in agent and Herdr worktrees |
 | Project dependencies | The same folders in primary project checkouts |
 
+Headroom looks for project dependencies under `~/Developer`, `~/.herdr`, `~/.t3`,
+and `~/.synara`. Docker commands use the active Docker context.
+
 **Review only** (measured and listed, never deleted): Claude VM image, Docker virtual
 disk, unused Docker volumes, Codex history, `~/.local/share`, Cursor state, Herdr
 worktrees, MeetingMind and WhatsApp data, Downloads, Movies, and Trash.
 
-## Requirements
-
-- macOS 26 or later for the app's Liquid Glass interface.
-- Python 3.10 or later (tested with Python 3.14). The app looks for `python3` in
-  `/opt/homebrew/bin` or `/usr/local/bin`.
-- The Swift toolchain to build the app. Command Line Tools suffice; full Xcode is not required.
-- Docker is optional; Docker entries are omitted when Docker is unavailable.
-
-## Usage
-
-From the repository root:
+## Command-line usage
 
 ```sh
-rtk proxy python3 cleanup.py              # Show the report without deleting anything
-rtk proxy python3 cleanup.py clean        # Ask before cleaning each safe category
-rtk proxy python3 cleanup.py clean --yes  # Clean every safe category without asking
+python3 cleanup.py scan              # Show the report without deleting anything
+python3 cleanup.py clean             # Ask before cleaning each category
+python3 cleanup.py scan --json      # Write the JSON report to stdout
 ```
 
-Use `--lang pt` or `--lang en` to override the shell locale. Command names are the same in both languages.
-
-App integration commands:
-
-```sh
-rtk proxy python3 cleanup.py scan --json             # Write the JSON report to stdout
-rtk proxy python3 cleanup.py scan --json --progress  # Also write progress events to stderr
-rtk proxy python3 cleanup.py apply --lang en         # Read a cleanup plan from stdin and apply it
-```
-
-In **Headroom**, click **Scan**, select categories, then choose **Delete selected…**.
-The app follows your system language by default. Choose **More options (…) → Language**
-to switch between **English** and **Português (Brasil)**. The app remembers your choice.
-
-## Build and install the app
-
-Run this from the repository root:
-
-```sh
-rtk proxy ./build-app.sh
-```
-
-The script builds and signs the app, then installs it at `~/Applications/Headroom.app`.
-The app looks for `cleanup.py` in `~/Developer/Headroom`; if your checkout lives
-elsewhere, update `CleanupEngine.locate()` before building.
-
-To regenerate the icon:
-
-```sh
-rtk proxy mkdir -p Resources
-rtk proxy swiftc Sources/Headroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/make-icon
-rtk proxy /tmp/make-icon Resources
-```
+The app uses `scan --json --progress` for progress events and `apply` to execute a
+confirmed plan. `apply` reads a plan from standard input and runs its commands
+with your permissions. Use it only with trusted input.
 
 ## Safety and permissions
 
@@ -141,8 +130,7 @@ rtk proxy /tmp/make-icon Resources
 ## Known limitations
 
 - `du` has no timeout. A stalled folder can block the scan.
-- `apply` checks the plan's format but does not restrict which commands it can
-  contain. Only use it with trusted input.
+- Project dependency scans are limited to the directories listed above.
 - `/tmp` and the user's temporary directory are not scanned.
 - Individual cleanup failures are printed and execution continues; a successful
   process exit does not establish that every command or path was cleaned.
@@ -152,7 +140,7 @@ rtk proxy /tmp/make-icon Resources
 From the repository root, run the Swift and Python suites with one command:
 
 ```sh
-rtk proxy make check
+make check
 ```
 
 Tests use named fakes for disk operations and external commands. They do not
@@ -169,10 +157,6 @@ with a small native runner: XCTest and Swift Testing are not required, so the
 Command Line Tools installation is sufficient. `make check` also builds the app
 with Swift Package Manager without installing or launching it.
 
-The CLI and JSON contract remain compatible during this structural migration.
-Engine packaging, command authorization, structured cleanup outcomes, and
-process timeouts are separate follow-up changes.
-
 ## Development
 
 - Keep filenames, identifiers, and comments in English.
@@ -180,3 +164,15 @@ process timeouts are separate follow-up changes.
   as `Localized(pt=..., en=...)`.
 - Add SwiftUI text to `Localization/*.lproj/Localizable.strings`. Use the English
   text as the key and provide a Brazilian Portuguese translation in `pt-BR.lproj`.
+
+To regenerate the icon:
+
+```sh
+swiftc Sources/Headroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/headroom-make-icon
+/tmp/headroom-make-icon Resources
+```
+
+## License
+
+Headroom is released under the [MIT License](LICENSE).
+The bundled IBM Plex Sans font is distributed under the [SIL Open Font License](Sources/Headroom/Fonts/LICENSE.txt).
