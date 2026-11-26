@@ -35,6 +35,7 @@ APPLY_COMMAND = "apply"
 YES_FLAG = "--yes"
 JSON_FLAG = "--json"
 PROGRESS_FLAG = "--progress"
+HELP_FLAGS = ("-h", "--help")
 # Portuguese and English affirmative answers are accepted by the same CLI.
 YES_ANSWERS: tuple[str, ...] = ("s", "sim", "y", "yes")
 
@@ -63,6 +64,10 @@ def main(
     argv: Sequence[str], language: str, operations: CleanupOperations | None = None
 ) -> int:
     """Dispatch a command with legacy exit codes. Example: ``main([], 'en')``."""
+    if any(flag in argv for flag in HELP_FLAGS):
+        print(USAGE.for_language(language))
+        return 0
+
     active = operations or default_operations()
     words = positional_words(argv)
     command = words[0] if words else SCAN_COMMAND
