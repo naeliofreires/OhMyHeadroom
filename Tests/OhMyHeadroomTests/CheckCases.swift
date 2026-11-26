@@ -23,6 +23,10 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("lazy gateway resolution", checkLazyResolution),
     ("data classification and expansion", checkDataClassificationAndExpansion),
     ("update indicator and cooldown", checkUpdateIndicatorAndCooldown),
+    ("dependency path toggle", checkDependencyPathToggle),
+    ("category toggle selects all paths", checkCategoryToggleSelectsAllPaths),
+    ("partial selection state", checkPartialSelectionState),
+    ("partial category click selects all", checkPartialCategoryClickSelectsAll),
   ]
 }
 
