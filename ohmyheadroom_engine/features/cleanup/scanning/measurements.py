@@ -5,6 +5,11 @@ from pathlib import Path
 
 from ohmyheadroom_engine.features.cleanup.catalog import HOME
 from ohmyheadroom_engine.features.cleanup.cleanup_types import Category, SizedPath
+from ohmyheadroom_engine.features.cleanup.scanning.docker import (
+    DOCKER_PRUNE_COMMANDS,
+    build_docker_category,
+    docker_reclaimable_bytes,
+)
 from ohmyheadroom_engine.i18n import Localized
 from ohmyheadroom_engine.platform.filesystem import FileSystem
 from ohmyheadroom_engine.platform.processes import ProcessRunner
@@ -54,6 +59,40 @@ def measure_bytes(
         return {}
     sizes_by_text = run_du(paths, process_runner)
     return {path: resolve_size(path, sizes_by_text, filesystem) for path in paths}
+
+
+def measure_selected_bytes(
+    categories: Sequence[Category],
+    filesystem: FileSystem | None = None,
+    process_runner: ProcessRunner | None = None,
+) -> int | None:
+    """Measure the remaining size of the selected targets, or None if incomplete."""
+    paths = [item.path for category in categories for item in category.paths]
+    total = 0
+    docker_size: int | None = None
+    try:
+        sizes = measure_bytes(tuple(dict.fromkeys(paths)), filesystem, process_runner)
+        # Count every reference as the scan did, while measuring each path once.
+        for path in paths:
+            size = sizes[path]
+            if size is None:
+                return None
+            total += size
+
+        for category in categories:
+            if not category.commands:
+                continue
+            if category.key != "docker-prune" or category.commands != DOCKER_PRUNE_COMMANDS:
+                return None
+            if docker_size is None:
+                reclaimable = docker_reclaimable_bytes(process_runner)
+                if reclaimable is None or not {"Images", "Build Cache"} <= reclaimable.keys():
+                    return None
+                docker_size = build_docker_category(reclaimable).size_bytes
+            total += docker_size
+    except (OSError, ValueError):
+        return None
+    return total
 
 
 def run_du(

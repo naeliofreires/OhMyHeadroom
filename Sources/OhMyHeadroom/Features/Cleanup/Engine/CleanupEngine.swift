@@ -68,12 +68,12 @@ struct CleanupEngine: CleanupGateway, Sendable {
     return try EngineJSON.decoder().decode(ScanReport.self, from: output)
   }
 
-  /// Sends the picked categories on stdin; the engine deletes them and prints a log.
-  func apply(_ categories: [Category]) async throws -> String {
+  /// Sends the selected categories and decodes the comparison and execution log.
+  func apply(_ categories: [Category]) async throws -> CleanupResult {
     let input = try EngineJSON.encoder().encode(categories)
-    let arguments = ["apply", "--lang", AppLanguage.current.engineCode]
+    let arguments = ["apply", "--json", "--lang", AppLanguage.current.engineCode]
     let output = try await run(arguments: arguments, input: input, onStep: nil)
-    return String(decoding: output, as: UTF8.self)
+    return try EngineJSON.decoder().decode(CleanupResult.self, from: output)
   }
 
   /// Launches the engine, streams its progress lines, and returns its stdout once it exits.

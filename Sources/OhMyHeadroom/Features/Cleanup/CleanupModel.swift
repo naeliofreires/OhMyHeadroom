@@ -10,7 +10,7 @@ final class CleanupModel {
     case scanning
     case ready
     case cleaning
-    case finished(log: String)
+    case finished(result: CleanupResult)
     case failed(message: String)
   }
 
@@ -111,8 +111,8 @@ final class CleanupModel {
     isConfirmingClean = false
     phase = .cleaning
     do {
-      let log = try await gateway.apply(picked)
-      phase = .finished(log: log)
+      let result = try await gateway.apply(picked)
+      phase = .finished(result: result)
     } catch {
       phase = .failed(message: error.localizedDescription)
     }

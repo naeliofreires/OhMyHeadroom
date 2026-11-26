@@ -28,8 +28,8 @@ struct PhaseContentView: View {
       } else {
         ReadyFormView(model: model)
       }
-    case .finished(let log):
-      FinishedFormView(log: log)
+    case .finished(let result):
+      FinishedFormView(result: result)
     case .failed(let message):
       ContentUnavailableView(
         "Could not finish",
@@ -87,23 +87,51 @@ struct ReadyFormView: View {
   }
 }
 
-/// The log of the last cleaning run, with a reminder that the numbers on screen are now old.
+/// Compares the selected sizes before and after cleanup and shows the execution log.
 struct FinishedFormView: View {
-  let log: String
+  let result: CleanupResult
 
   var body: some View {
     Form {
       Section {
-        Text(log)
+        comparisonRow("Before", bytes: result.beforeBytes)
+        comparisonRow("After", bytes: result.afterBytes)
+        let reduction = result.reductionBytes
+        if let reduction, reduction < 0 {
+          comparisonRow("Increase", bytes: -reduction)
+        } else {
+          comparisonRow("Reduction", bytes: reduction)
+        }
+      } header: {
+        Label("Selected cleanup", systemImage: "eraser")
+          .font(.panelHeading)
+      } footer: {
+        if result.afterBytes == nil {
+          Text("The remaining size could not be measured. See the cleanup log below.")
+        }
+      }
+      Section {
+        Text(result.log)
           .font(.system(.callout, design: .monospaced))
           .textSelection(.enabled)
       } header: {
         Label("Done", systemImage: "checkmark.circle")
           .font(.panelHeading)
       } footer: {
-        Label("Rescan to update sizes.", systemImage: "arrow.clockwise")
+        Label("Scan again to refresh all categories.", systemImage: "arrow.clockwise")
       }
     }
     .formStyle(.grouped)
+  }
+
+  private func comparisonRow(_ label: LocalizedStringKey, bytes: Int?) -> some View {
+    LabeledContent(label) {
+      if let bytes {
+        Text(ByteFormat.text(bytes))
+          .monospacedDigit()
+      } else {
+        Text("Unavailable")
+      }
+    }
   }
 }

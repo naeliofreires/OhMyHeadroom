@@ -45,4 +45,13 @@ class Report:
     free_bytes: int
 
 
-__all__ = ["Category", "Report", "ReviewLine", "SizedPath"]
+@dataclass(frozen=True)
+class CleanupResult:
+    """The selected size before and after cleanup, with its execution log."""
+
+    before_bytes: int
+    after_bytes: int | None
+    log: str
+
+
+__all__ = ["Category", "CleanupResult", "Report", "ReviewLine", "SizedPath"]

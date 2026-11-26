@@ -1,8 +1,10 @@
 """CLI orchestration for the cleanup feature."""
 
+import io
 import os
 import sys
 from collections.abc import Sequence
+from contextlib import nullcontext, redirect_stdout
 from dataclasses import dataclass
 from typing import Callable, TextIO
 
@@ -16,12 +18,14 @@ from ohmyheadroom_engine.cli.presentation import (
     print_freed_space,
     print_report,
 )
-from ohmyheadroom_engine.features.cleanup.cleanup_types import Category, Report
+from ohmyheadroom_engine.features.cleanup.cleanup_types import Category, CleanupResult, Report
 from ohmyheadroom_engine.features.cleanup.contracts import (
     categories_from_json,
+    cleanup_result_to_json,
     report_to_json,
 )
 from ohmyheadroom_engine.features.cleanup.execution.runner import clean_category
+from ohmyheadroom_engine.features.cleanup.scanning.measurements import measure_selected_bytes
 from ohmyheadroom_engine.features.cleanup.scanning.report import (
     build_report,
     disk_free_bytes,
@@ -48,6 +52,7 @@ class CleanupOperations:
     scan_with_progress: Callable[[TextIO | None], Report]
     free_bytes: Callable[[], int]
     apply: Callable[[Category, str], None]
+    measure_selected: Callable[[Sequence[Category]], int | None]
 
 
 def default_operations() -> CleanupOperations:
@@ -57,6 +62,7 @@ def default_operations() -> CleanupOperations:
         scan_with_progress=lambda stream: build_report(ProgressReporter(stream)),
         free_bytes=disk_free_bytes,
         apply=clean_category,
+        measure_selected=measure_selected_bytes,
     )
 
 
@@ -80,7 +86,7 @@ def main(
     if command == CLEAN_COMMAND:
         return run_clean(YES_FLAG in argv, language, active)
     if command == APPLY_COMMAND:
-        return run_apply(sys.stdin.read(), language, active)
+        return run_apply(sys.stdin.read(), language, active, json_output=JSON_FLAG in argv)
     print(USAGE.for_language(language))
     return 2
 
@@ -131,7 +137,11 @@ def run_clean(
 
 
 def run_apply(
-    plan_text: str, language: str, operations: CleanupOperations | None = None
+    plan_text: str,
+    language: str,
+    operations: CleanupOperations | None = None,
+    *,
+    json_output: bool = False,
 ) -> int:
     """Parse a complete plan before effects. Example: ``run_apply(plan, 'en', ops)``."""
     try:
@@ -140,10 +150,16 @@ def run_apply(
         print(REFUSED_PLAN.render(language, error=str(error)), file=sys.stderr)
         return 1
     active = operations or default_operations()
-    free_before = active.free_bytes()
-    for category in categories:
-        active.apply(category, language)
-    print_freed_space(free_before, active.free_bytes(), language)
+    before_bytes = sum(category.size_bytes for category in categories) if json_output else 0
+    log = io.StringIO() if json_output else None
+    with redirect_stdout(log) if log is not None else nullcontext():
+        free_before = active.free_bytes()
+        for category in categories:
+            active.apply(category, language)
+        print_freed_space(free_before, active.free_bytes(), language)
+    if log is not None:
+        after_bytes = active.measure_selected(categories)
+        print(cleanup_result_to_json(CleanupResult(before_bytes, after_bytes, log.getvalue())))
     return 0
 
 

@@ -10,3 +10,11 @@
 "System" = "System";
 "Light" = "Light";
 "Dark" = "Dark";
+"Selected cleanup" = "Selected cleanup";
+"Before" = "Before";
+"After" = "After";
+"Reduction" = "Reduction";
+"Increase" = "Increase";
+"Unavailable" = "Unavailable";
+"The remaining size could not be measured. See the cleanup log below." = "The remaining size could not be measured. See the cleanup log below.";
+"Scan again to refresh all categories." = "Scan again to refresh all categories.";

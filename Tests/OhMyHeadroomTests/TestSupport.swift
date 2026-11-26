@@ -14,6 +14,7 @@ final class FakeCleanupGateway: CleanupGateway, @unchecked Sendable {
   let report: ScanReport
   var scanError: Error?
   var applyError: Error?
+  var afterBytes: Int? = 0
   var appliedCategories: [Category] = []
   var applyCallCount = 0
   var progressStep: ScanStep?
@@ -28,11 +29,13 @@ final class FakeCleanupGateway: CleanupGateway, @unchecked Sendable {
     return report
   }
 
-  func apply(_ categories: [Category]) async throws -> String {
+  func apply(_ categories: [Category]) async throws -> CleanupResult {
     applyCallCount += 1
     if let applyError { throw applyError }
     appliedCategories = categories
-    return "done"
+    return CleanupResult(
+      beforeBytes: categories.reduce(0) { $0 + $1.sizeBytes }, afterBytes: afterBytes, log: "done"
+    )
   }
 }
 
@@ -78,7 +81,7 @@ actor BlockingCleanupGateway: CleanupGateway {
   private let eventStream: AsyncStream<String>
   private let eventContinuation: AsyncStream<String>.Continuation
   private var scanContinuation: CheckedContinuation<ScanReport, Never>?
-  private var applyContinuation: CheckedContinuation<String, Never>?
+  private var pendingApply: (CheckedContinuation<CleanupResult, Never>, CleanupResult)?
 
   init(report: ScanReport) {
     var continuation: AsyncStream<String>.Continuation?
@@ -100,9 +103,12 @@ actor BlockingCleanupGateway: CleanupGateway {
     return await withCheckedContinuation { scanContinuation = $0 }
   }
 
-  func apply(_ categories: [Category]) async throws -> String {
+  func apply(_ categories: [Category]) async throws -> CleanupResult {
     eventContinuation.yield("apply")
-    return await withCheckedContinuation { applyContinuation = $0 }
+    let result = CleanupResult(
+      beforeBytes: categories.reduce(0) { $0 + $1.sizeBytes }, afterBytes: 0, log: "done"
+    )
+    return await withCheckedContinuation { pendingApply = ($0, result) }
   }
 
   func releaseScan() {
@@ -111,8 +117,9 @@ actor BlockingCleanupGateway: CleanupGateway {
   }
 
   func releaseApply() {
-    applyContinuation?.resume(returning: "done")
-    applyContinuation = nil
+    guard let (continuation, result) = pendingApply else { return }
+    continuation.resume(returning: result)
+    pendingApply = nil
   }
 }
 

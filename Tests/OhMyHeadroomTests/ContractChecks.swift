@@ -28,6 +28,15 @@ func checkSharedFixtures() throws {
   let actual = try JSONSerialization.jsonObject(with: actualData) as? NSObject
   let expected = try JSONSerialization.jsonObject(with: expectedData) as? NSObject
   try check(actual == expected, "cleanup plan fixture mismatch")
+
+  let resultData = try Data(contentsOf: fixtureURL("cleanup-result.json"))
+  let result = try EngineJSON.decoder().decode(CleanupResult.self, from: resultData)
+  try check(result == CleanupResult(beforeBytes: 1200, afterBytes: 200, log: "done\n"),
+            "cleanup result fixture mismatch")
+  let unavailableData = Data(#"{"before_bytes":1200,"after_bytes":null,"log":"done\n"}"#.utf8)
+  let unavailable = try EngineJSON.decoder().decode(CleanupResult.self, from: unavailableData)
+  try check(unavailable == CleanupResult(beforeBytes: 1200, afterBytes: nil, log: "done\n"),
+            "unavailable result decode mismatch")
 }
 
 func checkProgressFixture() throws {
@@ -42,13 +51,16 @@ func checkProgressFixture() throws {
 
 func checkLazyResolution() async throws {
   let fake = FakeCleanupGateway(report: makeReport())
+  fake.afterBytes = 25
   fake.progressStep = ScanStep(position: 1, total: 1, label: makeText("Caches"), path: "~/Caches")
   let resolver = SequencedGatewayResolver(fallback: fake)
   let gateway = LazyCleanupGateway(resolve: { try resolver.resolve() })
   do { _ = try await gateway.scan { _ in } } catch {}
   let sink = StepSink()
   let scanned = try await gateway.scan { sink.step = $0 }
-  _ = try await gateway.apply(scanned.safe)
+  let result = try await gateway.apply(scanned.safe)
   try check(sink.step?.position == 1, "scan progress was not forwarded")
   try check(fake.applyCallCount == 1, "apply was not forwarded")
+  try check(result == CleanupResult(beforeBytes: 300, afterBytes: 25, log: "done"),
+            "cleanup result was not forwarded")
 }
