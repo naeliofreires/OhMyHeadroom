@@ -4,22 +4,22 @@ import unittest
 from pathlib import Path
 
 from adapter_fakes import FakeScanFileSystem, FakeScanProcessRunner
-from headroom_engine.features.cleanup.catalog import ReviewRule, SafeRule
-from headroom_engine.features.cleanup.scanning.dependencies import (
+from ohmyheadroom_engine.features.cleanup.catalog import ReviewRule, SafeRule
+from ohmyheadroom_engine.features.cleanup.scanning.dependencies import (
     build_dependency_categories,
     walk_dependency_dirs,
 )
-from headroom_engine.features.cleanup.scanning.docker import (
+from ohmyheadroom_engine.features.cleanup.scanning.docker import (
     build_docker_category,
     build_docker_volume_line,
     parse_docker_df,
     parse_docker_size,
 )
-from headroom_engine.features.cleanup.scanning.report import (
+from ohmyheadroom_engine.features.cleanup.scanning.report import (
     ScanRuntime,
     build_report,
 )
-from headroom_engine.i18n import Localized
+from ohmyheadroom_engine.i18n import Localized
 
 
 def text(value: str) -> Localized:

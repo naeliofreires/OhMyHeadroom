@@ -1,7 +1,7 @@
-// Draws the Headroom icon at every size macOS asks for, then packs them with iconutil.
-// Compile this file with Sources/Headroom/BrandArtwork.swift.
+// Draws the OhMyHeadroom icon at every size macOS asks for, then packs them with iconutil.
+// Compile this file with Sources/OhMyHeadroom/BrandArtwork.swift.
 // Run once from the repository root:
-//   swiftc Sources/Headroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/make-icon
+//   swiftc Sources/OhMyHeadroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/make-icon
 //   /tmp/make-icon Resources
 import AppKit
 import Foundation

@@ -6,7 +6,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from adapter_fakes import FakeDeletionFileSystem
-from headroom_engine.features.cleanup.execution.runner import (
+from ohmyheadroom_engine.features.cleanup.execution.runner import (
     delete_entry,
     is_inside_home,
     remove_path,

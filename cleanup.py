@@ -1,8 +1,8 @@
-"""Compatibility entry point for the feature-based Headroom engine."""
+"""Compatibility entry point for the feature-based OhMyHeadroom engine."""
 
 import sys
 
-from headroom_engine.cli.commands import run_main
+from ohmyheadroom_engine.cli.commands import run_main
 
 if __name__ == "__main__":
     sys.exit(run_main())

@@ -1,8 +1,8 @@
 /* English is the development language: the keys in the code are already English text.
    This file exists so macOS lists English as a supported language. */
 
-"Headroom" = "Headroom";
-"Quit Headroom" = "Quit Headroom";
+"OhMyHeadroom" = "OhMyHeadroom";
+"Quit OhMyHeadroom" = "Quit OhMyHeadroom";
 "Scanning your Mac" = "Scanning your Mac";
 "Starting the scan…" = "Starting the scan…";
 "Checking %@ of %@" = "Checking %@ of %@";
