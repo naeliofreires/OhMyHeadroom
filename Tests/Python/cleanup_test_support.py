@@ -155,7 +155,7 @@ def operations_for_report(
     measure_selected: Callable[[Sequence[Category]], int | None] | None = None,
 ) -> commands.CleanupOperations:
     """Build injected operations around one fake report. Example: ``operations_for_report(report, read)``."""
-    applier = apply or (lambda _category, _language: None)
+    applier = apply or (lambda _category, _language, _mode: None)
     return commands.CleanupOperations(
         scan=lambda: report,
         scan_with_progress=lambda _stream: report,
@@ -187,8 +187,8 @@ def failure_operations(
     return operations_for_report(
         report,
         lambda: 10,
-        lambda category, language: runner.clean_category(
-            category, language, files, process, runner.DeleteMode.PERMANENT
+        lambda category, language, mode: runner.clean_category(
+            category, language, files, process, mode
         ),
     )
 

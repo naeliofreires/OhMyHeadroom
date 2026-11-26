@@ -24,7 +24,7 @@ from ohmyheadroom_engine.features.cleanup.contracts import (
     cleanup_result_to_json,
     report_to_json,
 )
-from ohmyheadroom_engine.features.cleanup.execution.runner import clean_category
+from ohmyheadroom_engine.features.cleanup.execution.runner import DeleteMode, clean_category
 from ohmyheadroom_engine.features.cleanup.scanning.measurements import measure_selected_bytes
 from ohmyheadroom_engine.features.cleanup.scanning.report import (
     build_report,
@@ -38,6 +38,7 @@ CLEAN_COMMAND = "clean"
 APPLY_COMMAND = "apply"
 YES_FLAG = "--yes"
 JSON_FLAG = "--json"
+PERMANENT_FLAG = "--permanent"
 PROGRESS_FLAG = "--progress"
 HELP_FLAGS = ("-h", "--help")
 # Portuguese and English affirmative answers are accepted by the same CLI.
@@ -51,7 +52,7 @@ class CleanupOperations:
     scan: Callable[[], Report]
     scan_with_progress: Callable[[TextIO | None], Report]
     free_bytes: Callable[[], int]
-    apply: Callable[[Category, str], None]
+    apply: Callable[[Category, str, DeleteMode], None]
     measure_selected: Callable[[Sequence[Category]], int | None]
 
 
@@ -61,7 +62,7 @@ def default_operations() -> CleanupOperations:
         scan=build_report,
         scan_with_progress=lambda stream: build_report(ProgressReporter(stream)),
         free_bytes=disk_free_bytes,
-        apply=clean_category,
+        apply=apply_category,
         measure_selected=measure_selected_bytes,
     )
 
@@ -83,12 +84,31 @@ def main(
             if JSON_FLAG in argv
             else run_scan(language, active)
         )
+    delete_mode = delete_mode_from(argv)
     if command == CLEAN_COMMAND:
-        return run_clean(YES_FLAG in argv, language, active)
+        return run_clean(YES_FLAG in argv, language, active, delete_mode)
     if command == APPLY_COMMAND:
-        return run_apply(sys.stdin.read(), language, active, json_output=JSON_FLAG in argv)
+        return run_apply(
+            sys.stdin.read(),
+            language,
+            active,
+            json_output=JSON_FLAG in argv,
+            mode=delete_mode,
+        )
     print(USAGE.for_language(language))
     return 2
+
+
+def apply_category(category: Category, language: str, mode: DeleteMode) -> None:
+    """Clean one category with the chosen mode. Example: ``apply_category(category, 'en', mode)``."""
+    clean_category(category, language, mode=mode)
+
+
+def delete_mode_from(argv: Sequence[str]) -> DeleteMode:
+    """Pick the Trash unless --permanent is given. Example: ``delete_mode_from(['clean'])``."""
+    if PERMANENT_FLAG in argv:
+        return DeleteMode.PERMANENT
+    return DeleteMode.TRASH
 
 
 def positional_words(argv: Sequence[str]) -> list[str]:
@@ -121,7 +141,10 @@ def run_scan_json(
 
 
 def run_clean(
-    assume_yes: bool, language: str, operations: CleanupOperations | None = None
+    assume_yes: bool,
+    language: str,
+    operations: CleanupOperations | None = None,
+    mode: DeleteMode = DeleteMode.TRASH,
 ) -> int:
     """Confirm and apply safe categories. Example: ``run_clean(True, 'en', ops)``."""
     print(MEASURING_NOTICE.for_language(language), flush=True)
@@ -131,7 +154,7 @@ def run_clean(
     free_before = active.free_bytes()
     for category in report.safe:
         if confirm_clean(category, assume_yes, language):
-            active.apply(category, language)
+            active.apply(category, language, mode)
     print_freed_space(free_before, active.free_bytes(), language)
     return 0
 
@@ -142,6 +165,7 @@ def run_apply(
     operations: CleanupOperations | None = None,
     *,
     json_output: bool = False,
+    mode: DeleteMode = DeleteMode.TRASH,
 ) -> int:
     """Parse a complete plan before effects. Example: ``run_apply(plan, 'en', ops)``."""
     try:
@@ -155,7 +179,7 @@ def run_apply(
     with redirect_stdout(log) if log is not None else nullcontext():
         free_before = active.free_bytes()
         for category in categories:
-            active.apply(category, language)
+            active.apply(category, language, mode)
         print_freed_space(free_before, active.free_bytes(), language)
     if log is not None:
         after_bytes = active.measure_selected(categories)
