@@ -34,6 +34,8 @@ final class CleanupModel {
   private(set) var updateStatus: UpdateStatus = .idle
   /// Held here rather than in a view's @State: the Command Line Tools cannot expand @State.
   var isConfirmingClean = false
+  /// On by default: cleaning moves selected paths to the Trash; off deletes them for good.
+  var movesToTrash = true
   private(set) var freeBytes: Int?
 
   init(
@@ -47,6 +49,11 @@ final class CleanupModel {
     self.updateChecker = updateChecker
     self.updateCooldown = updateCooldown
     freeBytes = freeSpaceReader.currentFreeBytes()
+  }
+
+  /// The Trash note sits under the toggle only while cleaning goes to the Trash.
+  var shouldShowTrashNote: Bool {
+    movesToTrash
   }
 
   var isBusy: Bool {
@@ -191,7 +198,7 @@ final class CleanupModel {
     isConfirmingClean = false
     phase = .cleaning
     do {
-      let result = try await gateway.apply(picked)
+      let result = try await gateway.apply(picked, permanent: !movesToTrash)
       phase = .finished(result: result)
     } catch {
       phase = .failed(message: error.localizedDescription)

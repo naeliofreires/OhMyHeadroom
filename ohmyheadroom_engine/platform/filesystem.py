@@ -34,6 +34,10 @@ class FileSystem:
         """Report whether a path exists."""
         return path.exists()
 
+    def lexists(self, path: Path) -> bool:
+        """Report whether a path exists, counting a dangling symbolic link as present."""
+        return os.path.lexists(path)
+
     def is_symlink(self, path: Path) -> bool:
         """Report whether a path is a symbolic link."""
         return path.is_symlink()
@@ -53,3 +57,11 @@ class FileSystem:
     def unlink(self, path: Path) -> None:
         """Remove one file or symlink, ignoring an already absent path."""
         path.unlink(missing_ok=True)
+
+    def move(self, source: Path, destination: Path) -> None:
+        """Rename one entry to a new path on the same volume."""
+        source.rename(destination)
+
+    def make_directory(self, path: Path) -> None:
+        """Create a private folder, accepting one that already exists."""
+        path.mkdir(mode=0o700, parents=True, exist_ok=True)

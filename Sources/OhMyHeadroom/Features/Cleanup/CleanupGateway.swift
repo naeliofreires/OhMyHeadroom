@@ -2,7 +2,8 @@ import Foundation
 
 protocol CleanupGateway: Sendable {
   func scan(onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport
-  func apply(_ categories: [Category]) async throws -> CleanupResult
+  /// `permanent` true deletes for good; false moves each selected path to the Trash.
+  func apply(_ categories: [Category], permanent: Bool) async throws -> CleanupResult
 }
 
 protocol FreeSpaceReader: Sendable {
@@ -25,8 +26,8 @@ struct LazyCleanupGateway: CleanupGateway {
     return try await gateway.scan(onStep: onStep)
   }
 
-  func apply(_ categories: [Category]) async throws -> CleanupResult {
+  func apply(_ categories: [Category], permanent: Bool) async throws -> CleanupResult {
     let gateway = try resolve()
-    return try await gateway.apply(categories)
+    return try await gateway.apply(categories, permanent: permanent)
   }
 }
