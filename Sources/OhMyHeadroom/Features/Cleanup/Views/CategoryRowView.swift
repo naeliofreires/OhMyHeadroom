@@ -8,8 +8,11 @@ struct CategoryRowView: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Toggle(isOn: selectionBinding) {
+      Button {
+        model.toggle(category)
+      } label: {
         HStack(alignment: .top, spacing: 10) {
+          SelectionCheckbox(state: model.selectionState(of: category))
           categoryIcon
           VStack(alignment: .leading, spacing: 4) {
             headerRow
@@ -21,7 +24,7 @@ struct CategoryRowView: View {
           }
         }
       }
-      .toggleStyle(.checkbox)
+      .buttonStyle(.plain)
       .help(category.note.text)
 
       targetBreakdown
@@ -141,12 +144,6 @@ struct CategoryRowView: View {
     }
   }
 
-  private var selectionBinding: Binding<Bool> {
-    Binding(
-      get: { model.isSelected(category) },
-      set: { _ in model.toggle(category) }
-    )
-  }
 }
 
 /// Shared inset container for listing affected paths or commands under a row.
