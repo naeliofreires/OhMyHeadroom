@@ -250,7 +250,9 @@ class CommandTests(unittest.TestCase):
         operations = operations_for_report(
             report,
             files.free_bytes,
-            lambda selected, language: runner.clean_category(selected, language, files),
+            lambda selected, language: runner.clean_category(
+                selected, language, files, mode=runner.DeleteMode.PERMANENT
+            ),
             lambda selected: measurements.measure_selected_bytes(selected, files, process),
         )
         output = io.StringIO()
@@ -301,7 +303,12 @@ class ExecutionTests(unittest.TestCase):
         output = io.StringIO()
         with redirect_stdout(output):
             runner.run_command(("fake",), "en", fake_process)
-            runner.remove_path(Path("/Users/example/file"), "en", fake_files)
+            runner.remove_path(
+                Path("/Users/example/file"),
+                "en",
+                fake_files,
+                runner.DeleteMode.PERMANENT,
+            )
         self.assertEqual([("fake",)], fake_process.commands)
         self.assertEqual([Path("/Users/example/file")], fake_files.removed)
         self.assertIn("failed (1)", output.getvalue())
@@ -320,6 +327,7 @@ class ExecutionTests(unittest.TestCase):
                 Path("/Users/example/file"),
                 "en",
                 FailingFileSystem(Path("/Users/example")),
+                runner.DeleteMode.PERMANENT,
             )
         self.assertIn("could not remove", output.getvalue())
 

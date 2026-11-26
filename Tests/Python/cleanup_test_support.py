@@ -122,7 +122,7 @@ class FakeCleanupSink:
     def command(self, _command: tuple[str, ...], _language: str) -> None:
         self.events.append("command")
 
-    def path(self, _path: Path, _language: str) -> None:
+    def path(self, _path: Path, _language: str, *_args: object) -> None:
         self.events.append("path")
 
 
@@ -188,7 +188,7 @@ def failure_operations(
         report,
         lambda: 10,
         lambda category, language: runner.clean_category(
-            category, language, files, process
+            category, language, files, process, runner.DeleteMode.PERMANENT
         ),
     )
 
