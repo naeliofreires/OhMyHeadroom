@@ -42,6 +42,13 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("empty category left out of cleanup", checkEmptyCategoryLeftOutOfCleanup),
     ("cleanup selection through model only", checkCleanupSelectionThroughModelOnly),
     ("rescan resets path selection", checkRescanResetsPathSelection),
+    ("apply arguments omit permanent by default", { try checkApplyArgumentsOmitPermanentByDefault() }),
+    ("apply arguments add permanent when requested", { try checkApplyArgumentsAddPermanentWhenRequested() }),
+    ("trash toggle default sends trash", checkTrashToggleDefaultSendsTrash),
+    ("trash toggle off sends permanent", checkTrashToggleOffSendsPermanent),
+    ("engine apply omits permanent by default", checkEngineApplyOmitsPermanentByDefault),
+    ("trash note shown while toggle on", { try checkTrashNoteShownWhileToggleOn() }),
+    ("trash note hidden while toggle off", { try checkTrashNoteHiddenWhileToggleOff() }),
   ]
 }
 

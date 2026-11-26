@@ -58,7 +58,7 @@ func checkLazyResolution() async throws {
   do { _ = try await gateway.scan { _ in } } catch {}
   let sink = StepSink()
   let scanned = try await gateway.scan { sink.step = $0 }
-  let result = try await gateway.apply(scanned.safe)
+  let result = try await gateway.apply(scanned.safe, permanent: false)
   try check(sink.step?.position == 1, "scan progress was not forwarded")
   try check(fake.applyCallCount == 1, "apply was not forwarded")
   try check(result == CleanupResult(beforeBytes: 300, afterBytes: 25, log: "done"),

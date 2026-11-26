@@ -62,3 +62,5 @@
 "Python 3 was not found in /opt/homebrew/bin or /usr/local/bin." = "Python 3 não encontrado em /opt/homebrew/bin nem em /usr/local/bin.";
 "The engine was not found at %@. Reinstall OhMyHeadroom to restore it." = "Motor não encontrado em %@. Reinstale o OhMyHeadroom para restaurá-lo.";
 "The engine failed with code %@: %@" = "O motor falhou com código %@: %@";
+"Move to Trash" = "Mover para a Lixeira";
+"Space is freed only when the Trash is emptied." = "O espaço só é liberado quando a Lixeira for esvaziada.";

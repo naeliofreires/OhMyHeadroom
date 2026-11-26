@@ -13,6 +13,7 @@ from ohmyheadroom_engine.cli import commands
 from ohmyheadroom_engine.features.cleanup import contracts
 from ohmyheadroom_engine.features.cleanup.cleanup_types import Category, CleanupResult, SizedPath
 from ohmyheadroom_engine.features.cleanup.execution import runner
+from ohmyheadroom_engine.features.cleanup.execution.runner import DeleteMode
 from ohmyheadroom_engine.features.cleanup.scanning import docker, measurements
 from ohmyheadroom_engine.features.cleanup.scanning.progress import ProgressReporter
 from ohmyheadroom_engine.features.cleanup.scanning.report import build_report
@@ -192,7 +193,7 @@ class CommandTests(unittest.TestCase):
             events.append("free")
             return next(free_values)
 
-        def apply(category: Category, language: str) -> None:
+        def apply(category: Category, language: str, _mode: DeleteMode) -> None:
             events.append(category.key)
             print(f"Cleaning: {category.label.for_language(language)}")
 
@@ -222,7 +223,7 @@ class CommandTests(unittest.TestCase):
         output = io.StringIO()
         plan = json.dumps([category_to_payload(failure_category())])
         with redirect_stdout(output), patch.object(commands.sys, "stdin", io.StringIO(plan)):
-            code = commands.main(["apply"], "en", operations)
+            code = commands.main(["apply", "--permanent"], "en", operations)
         measure.assert_not_called()
         self.assertEqual(0, code)
         self.assertEqual([("fake", "cleanup")], fake_process.commands)
@@ -250,7 +251,9 @@ class CommandTests(unittest.TestCase):
         operations = operations_for_report(
             report,
             files.free_bytes,
-            lambda selected, language: runner.clean_category(selected, language, files),
+            lambda selected, language, _mode: runner.clean_category(
+                selected, language, files, mode=DeleteMode.PERMANENT
+            ),
             lambda selected: measurements.measure_selected_bytes(selected, files, process),
         )
         output = io.StringIO()
@@ -301,7 +304,12 @@ class ExecutionTests(unittest.TestCase):
         output = io.StringIO()
         with redirect_stdout(output):
             runner.run_command(("fake",), "en", fake_process)
-            runner.remove_path(Path("/Users/example/file"), "en", fake_files)
+            runner.remove_path(
+                Path("/Users/example/file"),
+                "en",
+                fake_files,
+                runner.DeleteMode.PERMANENT,
+            )
         self.assertEqual([("fake",)], fake_process.commands)
         self.assertEqual([Path("/Users/example/file")], fake_files.removed)
         self.assertIn("failed (1)", output.getvalue())
@@ -320,6 +328,7 @@ class ExecutionTests(unittest.TestCase):
                 Path("/Users/example/file"),
                 "en",
                 FailingFileSystem(Path("/Users/example")),
+                runner.DeleteMode.PERMANENT,
             )
         self.assertIn("could not remove", output.getvalue())
 
