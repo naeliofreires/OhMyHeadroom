@@ -21,6 +21,7 @@ func allCheckCases() -> [(String, CheckCase)] {
     ("shared fixtures", { try checkSharedFixtures() }),
     ("progress fixture", { try checkProgressFixture() }),
     ("lazy gateway resolution", checkLazyResolution),
+    ("data classification and expansion", checkDataClassificationAndExpansion),
   ]
 }
 

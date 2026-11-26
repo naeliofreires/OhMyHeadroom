@@ -55,7 +55,8 @@ REVIEW_HEADING = Localized(
 )
 TOTAL_SAFE = Localized(pt="Total seguro: {size}", en="Total safe: {size}")
 FREE_NOW = Localized(pt="Espaço livre agora: {size}", en="Free space now: {size}")
-BIGGEST_ITEMS = Localized(pt="maiores: ", en="biggest: ")
+BIGGEST_ITEMS = Localized(pt="caminhos principais:", en="top paths:")
+COMMANDS_LABEL = Localized(pt="comandos:", en="commands:")
 FREED_THIS_RUN = Localized(
     pt="Liberado nesta rodada: {freed}. Espaço livre agora: {free}",
     en="Freed in this run: {freed}. Free space now: {free}",
@@ -64,6 +65,47 @@ CANCELLED = Localized(
     pt="Cancelado. A limpeza foi interrompida.", en="Cancelled. Cleanup stopped."
 )
 NO_ACCESS = Localized(pt="sem acesso", en="no access")
+
+CATEGORY_KIND_LABELS: dict[str, tuple[Localized, Localized]] = {
+    "app-caches": (
+        Localized(pt="Cache de apps", en="App cache"),
+        Localized(pt="Recriado automaticamente", en="Auto-recreated"),
+    ),
+    "package-caches": (
+        Localized(pt="Cache de pacotes", en="Package cache"),
+        Localized(pt="Baixado de novo no install", en="Re-downloaded on install"),
+    ),
+    "editor-caches": (
+        Localized(pt="Cache de editores", en="Editor cache"),
+        Localized(pt="Recriado automaticamente", en="Auto-recreated"),
+    ),
+    "logs": (
+        Localized(pt="Logs", en="Logs"),
+        Localized(pt="Registros descartáveis", en="Disposable records"),
+    ),
+    "docker-prune": (
+        Localized(pt="Docker", en="Docker"),
+        Localized(pt="Imagens e cache (sem volumes)", en="Images & cache (volumes kept)"),
+    ),
+    "deps-worktrees": (
+        Localized(pt="Deps de worktrees", en="Worktree deps"),
+        Localized(pt="Requer reinstalação", en="Reinstall required"),
+    ),
+    "deps-projects": (
+        Localized(pt="Deps de projetos", en="Project deps"),
+        Localized(pt="Requer reinstalação", en="Reinstall required"),
+    ),
+}
+DEFAULT_KIND_LABEL = (
+    Localized(pt="Temporário", en="Temporary"),
+    Localized(pt="Recriado quando necessário", en="Recreated as needed"),
+)
+
+
+def category_kind_text(key: str, language: str) -> str:
+    """Return a concise localized kind + recovery label for a category key."""
+    badge, recovery = CATEGORY_KIND_LABELS.get(key, DEFAULT_KIND_LABEL)
+    return f"[{badge.for_language(language)} · {recovery.for_language(language)}]"
 
 
 def format_size(size_bytes: int | None, language: str) -> str:
@@ -101,24 +143,31 @@ def print_report(
 
 
 def print_category(number: int, category: Category, language: str) -> None:
-    """Render one category and its largest paths. Example: ``print_category(1, category, 'en')``."""
+    """Render one category with title, data type, description, and paths or commands."""
     label = category.label.for_language(language)
-    print(f"\n {number}. {label}: {format_size(category.size_bytes, language)}")
+    kind = category_kind_text(category.key, language)
+    print(f"\n {number}. {label} — {format_size(category.size_bytes, language)}")
+    print(f"      {kind}")
     print(f"      {category.note.for_language(language)}")
-    biggest = [
-        f"{display_path(item.path)} {format_size(item.size_bytes, language)}"
-        for item in category.paths[:3]
-    ]
+    biggest = category.paths[:3]
     if biggest:
-        print(f"      {BIGGEST_ITEMS.for_language(language)}{' · '.join(biggest)}")
+        print(f"      {BIGGEST_ITEMS.for_language(language)}")
+        for item in biggest:
+            print(f"        - {display_path(item.path)} ({format_size(item.size_bytes, language)})")
+    elif category.commands:
+        print(f"      {COMMANDS_LABEL.for_language(language)}")
+        for command in category.commands:
+            print(f"        $ {' '.join(command)}")
 
 
 def print_review_line(line: ReviewLine, language: str) -> None:
-    """Render one review folder and its note. Example: ``print_review_line(line, 'en')``."""
+    """Render one review folder, its note, and optional path."""
     print(
-        f" - {line.label.for_language(language)}: {format_size(line.size_bytes, language)}"
+        f" - {line.label.for_language(language)} — {format_size(line.size_bytes, language)}"
     )
     print(f"      {line.note.for_language(language)}")
+    if line.folder is not None:
+        print(f"      {display_path(line.folder)}")
 
 
 def print_freed_space(free_before: int, free_after: int, language: str) -> None:

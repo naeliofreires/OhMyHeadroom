@@ -443,6 +443,40 @@ class FormattingTests(unittest.TestCase):
         self.assertEqual("1,2 KB", format_size(1234, "pt"))
         self.assertEqual("no access", format_size(None, "en"))
 
+    def test_print_report_shows_type_description_paths_and_commands(self) -> None:
+        from ohmyheadroom_engine.cli.presentation import print_report
+        from ohmyheadroom_engine.features.cleanup.cleanup_types import Report
+
+        report = Report(
+            safe=(
+                Category(
+                    key="app-caches",
+                    label=localized("App caches"),
+                    note=localized("Recreated automatically"),
+                    size_bytes=1200,
+                    paths=(SizedPath(Path("/Users/example/Library/Caches/app"), 1200),),
+                ),
+                Category(
+                    key="docker-prune",
+                    label=localized("Docker prune"),
+                    note=localized("Volumes kept"),
+                    size_bytes=2000,
+                    commands=(("docker", "image", "prune", "-a", "-f"),),
+                ),
+            ),
+            review=(),
+            free_bytes=9000,
+        )
+        output = io.StringIO()
+        with redirect_stdout(output):
+            print_report(report, "en", lambda: 9000)
+        rendered = output.getvalue()
+        self.assertIn("[App cache · Auto-recreated]", rendered)
+        self.assertIn("Recreated automatically", rendered)
+        self.assertIn("/Users/example/Library/Caches/app (1.2 KB)", rendered)
+        self.assertIn("[Docker · Images & cache (volumes kept)]", rendered)
+        self.assertIn("$ docker image prune -a -f", rendered)
+
 
 if __name__ == "__main__":
     unittest.main()
