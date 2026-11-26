@@ -58,7 +58,7 @@ final class CleanupModel {
   }
 
   var menuBarTitle: String {
-    guard let freeBytes else { return "Police Scan" }
+    guard let freeBytes else { return "Headroom" }
     return String(localized: "\(ByteFormat.text(freeBytes)) free", bundle: AppLanguage.current.stringsBundle)
   }
 

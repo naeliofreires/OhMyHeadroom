@@ -14,15 +14,31 @@ struct PoliceScanApp: App {
         .environment(\.locale, language.locale)
         .id(language)
     } label: {
-      // Label would show only the icon in the menu bar; an explicit HStack keeps the number visible.
-      HStack(spacing: 4) {
-        Image(systemName: "internaldrive")
-        Text(model.menuBarTitle)
-          .monospacedDigit()
-      }
-      .environment(\.locale, language.locale)
+      menuBarLabel
     }
     .menuBarExtraStyle(.window)
+  }
+
+  @ViewBuilder
+  private var menuBarLabel: some View {
+    let label = HStack(spacing: 4) {
+      Image(nsImage: BrandArtwork.menuBarImage)
+        .renderingMode(.template)
+        .frame(width: 18, height: 18)
+        .accessibilityHidden(true)
+      Text(model.menuBarTitle)
+        .monospacedDigit()
+    }
+    .environment(\.locale, language.locale)
+    .help("Headroom")
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel("Headroom")
+
+    if model.freeBytes != nil {
+      label.accessibilityValue(model.menuBarTitle)
+    } else {
+      label
+    }
   }
 }
 

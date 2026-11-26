@@ -4,17 +4,19 @@ import SwiftUI
 /// App name, free space, the scan button, and the options menu.
 struct PanelHeaderView: View {
   let model: CleanupModel
+  @Environment(\.colorScheme) private var colorScheme
   @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
 
   var body: some View {
     HStack(spacing: 12) {
-      Image(systemName: "internaldrive")
-        .font(.title)
-        .foregroundStyle(.tint)
+      Image(nsImage: BrandArtwork.headerImage)
+        .renderingMode(.template)
+        .frame(width: 28, height: 28)
+        .foregroundStyle(Color(colorScheme == .dark ? BrandArtwork.pearl : BrandArtwork.sapphire))
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 2) {
-        Text("Police Scan")
-          .font(.panelHeading)
+        Text("Headroom")
+          .font(.system(size: 17, weight: .semibold))
         Text("\(ByteFormat.text(model.freeBytes)) free")
           .font(.subheadline)
           .monospacedDigit()
@@ -62,7 +64,7 @@ struct PanelHeaderView: View {
         Button("Reset") { model.reset() }
         Divider()
       }
-      Button("Quit Police Scan") {
+      Button("Quit Headroom") {
         NSApplication.shared.terminate(nil)
       }
       .keyboardShortcut("q")
