@@ -19,7 +19,7 @@ category could free and deletes only the categories you select.
 - Docker is optional. Docker entries are omitted when Docker is unavailable.
 
 ```sh
-git clone https://github.com/naeliofreires/Headroom.git OhMyHeadroom
+git clone https://github.com/naeliofreires/OhMyHeadroom.git
 cd OhMyHeadroom
 ./build-app.sh
 ```
