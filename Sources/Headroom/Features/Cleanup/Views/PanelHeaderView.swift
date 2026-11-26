@@ -6,6 +6,7 @@ struct PanelHeaderView: View {
   let model: CleanupModel
   @Environment(\.colorScheme) private var colorScheme
   @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
+  @AppStorage(AppTheme.preferenceKey) private var theme = AppTheme.system
 
   var body: some View {
     HStack(spacing: 12) {
@@ -57,6 +58,12 @@ struct PanelHeaderView: View {
       Picker("Language", selection: $language) {
         Text(verbatim: "English").tag(AppLanguage.english)
         Text(verbatim: "Português (Brasil)").tag(AppLanguage.portuguese)
+      }
+      .pickerStyle(.menu)
+      Picker("Theme", selection: $theme) {
+        Text("System").tag(AppTheme.system)
+        Text("Light").tag(AppTheme.light)
+        Text("Dark").tag(AppTheme.dark)
       }
       .pickerStyle(.menu)
       Divider()

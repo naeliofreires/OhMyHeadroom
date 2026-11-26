@@ -37,6 +37,9 @@ Headroom supports English and Brazilian Portuguese. The app follows the system
 language by default. Use **More options (…) → Language** to change it, or pass
 `--lang pt` or `--lang en` to the CLI.
 
+Use **More options (…) → Theme** to choose **Light**, **Dark**, or **System**.
+Headroom follows the macOS appearance by default and remembers your selection.
+
 ## How it works
 
 The app runs `python3 cleanup.py scan --json --progress` to get a scan report on

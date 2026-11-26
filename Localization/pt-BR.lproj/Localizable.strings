@@ -14,6 +14,10 @@
 "Quit Headroom" = "Sair do Headroom";
 "More options" = "Mais opções";
 "Language" = "Idioma";
+"Theme" = "Tema";
+"System" = "Sistema";
+"Light" = "Claro";
+"Dark" = "Escuro";
 "Ready to scan" = "Pronto para medir";
 "Scanning won’t delete files." = "Medir não apaga arquivos.";
 "Deleting selection…" = "Apagando seleção…";
