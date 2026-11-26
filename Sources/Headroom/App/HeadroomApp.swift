@@ -1,9 +1,11 @@
+import AppKit
 import SwiftUI
 
 /// Menu bar entry point. The label shows free space, so the number is visible without opening anything.
 @main
 struct HeadroomApp: App {
   @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
+  @AppStorage(AppTheme.preferenceKey) private var theme = AppTheme.system
   // A plain constant: the Command Line Tools cannot expand the @State macro, and the app
   // only has this one scene, so the model lives as long as the app does.
   private let model = CleanupModel(gateway: CleanupComposition.makeGateway())
@@ -17,6 +19,9 @@ struct HeadroomApp: App {
       menuBarLabel
     }
     .menuBarExtraStyle(.window)
+    .onChange(of: theme, initial: true) {
+      NSApplication.shared.appearance = theme.appearance
+    }
   }
 
   @ViewBuilder
@@ -38,6 +43,22 @@ struct HeadroomApp: App {
       label.accessibilityValue(model.menuBarTitle)
     } else {
       label
+    }
+  }
+}
+
+enum AppTheme: String {
+  case system
+  case light
+  case dark
+
+  static let preferenceKey = "appTheme"
+
+  var appearance: NSAppearance? {
+    switch self {
+    case .system: nil
+    case .light: NSAppearance(named: .aqua)
+    case .dark: NSAppearance(named: .darkAqua)
     }
   }
 }

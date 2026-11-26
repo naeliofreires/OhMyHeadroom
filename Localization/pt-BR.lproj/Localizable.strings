@@ -14,6 +14,10 @@
 "Quit Headroom" = "Sair do Headroom";
 "More options" = "Mais opções";
 "Language" = "Idioma";
+"Theme" = "Tema";
+"System" = "Sistema";
+"Light" = "Claro";
+"Dark" = "Escuro";
 "Ready to scan" = "Pronto para medir";
 "Scanning only measures disk usage." = "A medição apenas verifica o uso do disco.";
 "Clearing selected categories…" = "Limpando as categorias selecionadas…";
