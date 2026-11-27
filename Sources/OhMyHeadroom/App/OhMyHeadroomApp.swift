@@ -7,7 +7,7 @@ struct OhMyHeadroomApp: App {
   @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
   @AppStorage(AppTheme.preferenceKey) private var theme = AppTheme.system
   // A plain constant: the Command Line Tools cannot expand the @State macro, and the app
-  // only has this one scene, so the model lives as long as the app does.
+  // only needs one model for the menu bar and the preferences window.
   private let model = CleanupModel(
     gateway: CleanupComposition.makeGateway(),
     updateChecker: GitHubMainUpdateChecker()
@@ -25,6 +25,15 @@ struct OhMyHeadroomApp: App {
     .onChange(of: theme, initial: true) {
       NSApplication.shared.appearance = theme.appearance
     }
+
+    Window(String(localized: "Project folders", bundle: language.stringsBundle), id: ScanRootsView.windowID) {
+      ScanRootsView(model: model)
+        .environment(\.locale, language.locale)
+        .frame(width: 500, height: 580)
+    }
+    .defaultLaunchBehavior(.suppressed)
+    .restorationBehavior(.disabled)
+    .windowResizability(.contentSize)
   }
 
   @ViewBuilder

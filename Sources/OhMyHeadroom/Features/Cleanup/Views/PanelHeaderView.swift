@@ -5,6 +5,7 @@ import SwiftUI
 struct PanelHeaderView: View {
   let model: CleanupModel
   @Environment(\.colorScheme) private var colorScheme
+  @Environment(\.openWindow) private var openWindow
   @AppStorage(AppLanguage.preferenceKey) private var language = AppLanguage.systemDefault
   @AppStorage(AppTheme.preferenceKey) private var theme = AppTheme.system
 
@@ -165,6 +166,11 @@ struct PanelHeaderView: View {
         Text("Dark").tag(AppTheme.dark)
       }
       .pickerStyle(.menu)
+      Button("Project folders…") {
+        NSApp.activate()
+        openWindow(id: ScanRootsView.windowID)
+      }
+      .disabled(model.isBusy)
       Divider()
       if model.canReset {
         Button("Reset") { model.reset() }

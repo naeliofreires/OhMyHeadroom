@@ -16,7 +16,7 @@ Executar as tarefas com a skill `tlc-spec-driven`. Registrar o resultado do gate
 
 A CLI resolve as raízes para a varredura e passa a lista ao `ScanRuntime` já aceito por `build_report`. A opção pública `--scan-root PASTA` exige diretórios acessíveis e vale para `scan` explícito ou implícito. O app usa o mesmo comando em modo JSON com `--scan-roots-stdin` e envia a lista por stdin, seguindo o transporte já usado por `apply`. A entrada do app aceita `[]` e preserva caminhos salvos que venham a ficar indisponíveis. O caminho padrão da CLI continua vindo do catálogo Python. A descoberta elimina caminhos repetidos antes de medir.
 
-No Swift, `CleanupModel` carrega as raízes de `UserDefaults`, distingue a ausência da preferência de uma lista salva vazia, protege a edição com `isBusy` e reutiliza `reset()` após alterações efetivas. `CleanupGateway` leva uma cópia da lista para cada varredura. O catálogo Python e a lista inicial do app declaram os quatro caminhos compatíveis com o comportamento atual. As opções do app apresentam um editor no painel, com lista rolável, estado vazio, botão de adicionar que abre um seletor nativo de diretórios e remoção por linha. Os estados e as transições ficam no modelo. As strings seguem os recursos localizados do app.
+No Swift, `CleanupModel` carrega as raízes de `UserDefaults`, distingue a ausência da preferência de uma lista salva vazia, protege a edição com `isBusy` e reutiliza `reset()` após alterações efetivas. `CleanupGateway` leva uma cópia da lista para cada varredura. O catálogo Python e a lista inicial do app declaram os quatro caminhos compatíveis com o comportamento atual. O menu abre uma janela de preferências com lista rolável, estado vazio, seletor nativo de diretórios e remoção por linha. O teste do popover encontrou um problema de foco ao usar o seletor como folha. A janela de preferências permite abrir o seletor sem fechar o editor. As regras de edição e as transições ficam no modelo. As strings seguem os recursos localizados do app.
 
 O processo do app e a CLI precisam de comportamentos diferentes para volumes removidos ou entradas ausentes. O teste da interface entre os processos cobre esse contraste, além do caso de `[]` e de caminhos com espaços. A visita usa um bundle e uma preferência isolados, com projetos temporários e sem executar limpeza. Ela cobre a interação com o seletor, que o runner Swift não abre.
 
@@ -110,7 +110,7 @@ T1 → T2 → T3 → T4
 
 ### T4: Gerenciar as raízes pelo menu de opções
 
-**What**: Abrir o editor de pastas pelo menu do painel macOS, com seletor de diretórios, remoção de entradas, estado vazio e strings localizadas. Documentar como abrir o editor no README.
+**What**: Abrir a janela de pastas de projetos pelo menu do painel macOS, com seletor de diretórios, remoção de entradas, estado vazio e strings localizadas. Documentar como abrir o editor no README.
 **Where**: `Sources/OhMyHeadroom/Features/Cleanup/Views/PanelHeaderView.swift`
 **Depends on**: T3
 **Reuses**: Menu e dimensões existentes, operações do modelo, `NSOpenPanel`, `PathDisplay` e `Localization/*.lproj/Localizable.strings`.
@@ -119,8 +119,8 @@ T1 → T2 → T3 → T4
 **Done when**:
 
 - [ ] Pelo menu, o usuário abre a lista inicial, adiciona uma pasta de teste, cancela outra tentativa, vê o projeto após Scan, remove a raiz e volta ao estado inicial.
-- [ ] A pasta permanece no disco. Uma nova varredura exclui seu conteúdo da descoberta e a edição persiste ao reabrir o app. A lista vazia é apresentada no mesmo painel com a opção de adicionar disponível.
-- [ ] `make build-swift` termina com status 0 e a visita acontece no app empacotado em um bundle de teste.
+- [x] A pasta permanece no disco. Uma nova varredura exclui seu conteúdo da descoberta e a edição persiste ao reabrir o app. A janela apresenta a lista vazia com a opção de adicionar disponível.
+- [x] `make build-swift` terminou com status 0, e a visita foi feita no app empacotado em um bundle de teste.
 
 **Tests**: e2e nativo, registrado no Handoff. As regras acionadas pelos controles têm checks de modelo e motor nas tarefas anteriores.
 **Gate**: Build e Walk.
@@ -177,4 +177,4 @@ Proof: run discovery | test_overlapping_roots_count_each_dependency_once (test_s
 
 **Settled mid-build:** none.
 **Dispatched:** none.
-**Walked:** pending.
+**Walked:** App empacotado no macOS com identificador e preferências de teste isolados. Pelo ícone da barra de menus, abrir `More options → Project folders…` mostrou as quatro raízes iniciais e abriu o seletor nativo pelo botão `Add folder…`. A automação local abriu e observou o seletor, mas não conseguiu acionar a confirmação ou o cancelamento no serviço de seleção do macOS. A cobertura desses dois resultados no modelo é automática. Para verificar a descoberta no app, duas raízes foram salvas no domínio de teste antes da abertura e uma foi movida no disco. `Scan` encontrou `Alpha/node_modules` na raiz disponível e a janela conservou a entrada `Missing Project`. O botão de remoção retirou `Active Project`, preservou seu arquivo sentinela, e `Done` retornou ao painel com `Ready to scan`. O Scan seguinte deixou de listar `Alpha/node_modules`. Depois da remoção da última entrada, o app foi encerrado e reaberto, e a janela mostrou `No project folders` e `Add folder…`. CLI em árvore temporária: sem flags, o JSON listou apenas `Cli Default/node_modules`. Com duas flags, listou `Alpha/node_modules` e `Beta/.venv`. Uma raiz inexistente retornou status 2, diagnóstico em stderr e stdout vazio.
