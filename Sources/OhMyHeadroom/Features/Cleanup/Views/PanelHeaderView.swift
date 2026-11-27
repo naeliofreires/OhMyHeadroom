@@ -19,7 +19,7 @@ struct PanelHeaderView: View {
           .accessibilityHidden(true)
         VStack(alignment: .leading, spacing: 2) {
           Text("OhMyHeadroom")
-            .font(.system(size: 17, weight: .semibold))
+            .font(.system(size: 17, weight: .medium))
           Text("\(ByteFormat.text(model.freeBytes)) free")
             .font(.subheadline)
             .monospacedDigit()
@@ -49,7 +49,7 @@ struct PanelHeaderView: View {
               .foregroundStyle(.blue)
             VStack(alignment: .leading, spacing: 1) {
               Text("Update available (\(update.shortLatestSHA))")
-                .font(.caption.weight(.semibold))
+                .font(.caption.weight(.medium))
                 .foregroundStyle(.primary)
               if let title = update.commitTitle {
                 Text(verbatim: title)

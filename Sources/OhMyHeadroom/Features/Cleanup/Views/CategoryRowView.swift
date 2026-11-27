@@ -48,12 +48,12 @@ struct CategoryRowView: View {
   private var headerRow: some View {
     HStack(alignment: .firstTextBaseline, spacing: 8) {
       Text(category.label.text)
-        .font(.system(.body, weight: .semibold))
+        .font(.system(.body, weight: .medium))
         .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
       Text(ByteFormat.text(pickedBytes))
-        .font(.system(.body, weight: .semibold))
+        .font(.system(.body, weight: .medium))
         .monospacedDigit()
         .foregroundStyle(pickedBytes > 0 ? .primary : .secondary)
         .fixedSize()
@@ -191,7 +191,7 @@ struct DataKindPill: View {
 
   var body: some View {
     Text(kind.badge.text)
-      .font(.caption2.weight(.semibold))
+      .font(.caption2.weight(.medium))
       .foregroundStyle(kind.tint)
       .padding(.horizontal, 6)
       .padding(.vertical, 2)

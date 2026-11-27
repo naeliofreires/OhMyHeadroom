@@ -44,7 +44,7 @@ struct PhaseContentView: View {
     let selected = model.selectedCategories
     return VStack(spacing: 14) {
       Text("Clear selected categories (\(size))?")
-        .font(.headline)
+        .font(.headline.weight(.medium))
         .multilineTextAlignment(.center)
 
       ScrollView {
