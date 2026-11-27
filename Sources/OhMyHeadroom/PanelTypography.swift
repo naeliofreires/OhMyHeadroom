@@ -10,4 +10,7 @@ extension Font {
         guard NSFont(name: name, size: 13) != nil else { return .headline.weight(.medium) }
         return .custom(name, size: 13, relativeTo: .headline)
     }()
+
+    static let panelRowEmphasis: Font = .system(.body, weight: .medium)
+    static let panelBadge: Font = .caption2.weight(.medium)
 }

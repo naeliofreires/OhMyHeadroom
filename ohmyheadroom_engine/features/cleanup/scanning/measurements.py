@@ -114,8 +114,9 @@ def resolve_size(
     filesystem: FileSystem | None = None,
 ) -> int | None:
     """Use ``du`` output, preserving None for blocked paths. Example: ``resolve_size(path, sizes)``."""
-    if str(path) in sizes_by_text:
-        return sizes_by_text[str(path)]
+    path_text = str(path)
+    if path_text in sizes_by_text:
+        return sizes_by_text[path_text]
     adapter = filesystem or FileSystem(HOME)
     if adapter.exists(path) or adapter.is_symlink(path):
         return None

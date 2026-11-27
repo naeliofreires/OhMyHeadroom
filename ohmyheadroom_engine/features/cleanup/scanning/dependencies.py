@@ -97,10 +97,14 @@ def partition_dependency_paths(
     paths: Sequence[SizedPath],
 ) -> tuple[list[SizedPath], list[SizedPath]]:
     """Split paths by worktree ownership. Example: ``partition_dependency_paths(paths)``."""
-    return (
-        [item for item in paths if is_worktree_path(item.path)],
-        [item for item in paths if not is_worktree_path(item.path)],
-    )
+    worktree_items: list[SizedPath] = []
+    project_items: list[SizedPath] = []
+    for item in paths:
+        if is_worktree_path(item.path):
+            worktree_items.append(item)
+        else:
+            project_items.append(item)
+    return worktree_items, project_items
 
 
 def find_dependency_dirs(

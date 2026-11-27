@@ -27,12 +27,12 @@ struct ReviewRowView: View {
     VStack(alignment: .leading, spacing: 6) {
       HStack(alignment: .firstTextBaseline, spacing: 8) {
         Text(line.label.text)
-          .font(.system(.body, weight: .medium))
+          .font(.panelRowEmphasis)
           .foregroundStyle(.primary)
           .fixedSize(horizontal: false, vertical: true)
         Spacer(minLength: 8)
         Text(ByteFormat.text(line.sizeBytes))
-          .font(.system(.body, weight: .medium))
+          .font(.panelRowEmphasis)
           .monospacedDigit()
           .foregroundStyle(.secondary)
           .fixedSize()
@@ -40,7 +40,7 @@ struct ReviewRowView: View {
 
       HStack(spacing: 6) {
         Text("Keep or review")
-          .font(.caption2.weight(.medium))
+          .font(.panelBadge)
           .foregroundStyle(.secondary)
           .padding(.horizontal, 6)
           .padding(.vertical, 2)
