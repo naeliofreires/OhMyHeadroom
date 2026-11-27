@@ -100,7 +100,10 @@ def find_dependency_dirs(
 ) -> list[Path]:
     """Walk a root without descending into dependencies. Example: ``find_dependency_dirs(root, names, fs)``."""
     adapter = filesystem or FileSystem(HOME)
-    if not adapter.is_directory(root):
+    try:
+        if not adapter.is_directory(root):
+            return []
+    except OSError:
         return []
     return walk_dependency_dirs(adapter.walk(root), dependency_dir_names)
 

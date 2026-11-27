@@ -80,10 +80,10 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] A saída humana e JSON usa apenas os caminhos pedidos com `--scan-root`. Sem a opção, usa os quatro padrões. Entradas inválidas falham com status 2 e diagnóstico em stderr antes de emitir o relatório.
-- [ ] O comando usado pelo app aceita uma lista de caminhos com espaços, uma lista vazia e uma raiz salva indisponível ao lado de outra válida. O relatório continua medindo categorias comuns.
-- [ ] A ajuda em português e inglês explica que a opção é repetível e substitui as raízes padrão para `scan`.
-- [ ] `Run cli` passa com 22 testes.
+- [x] A saída humana e JSON usa apenas os caminhos pedidos com `--scan-root`. Sem a opção, usa os quatro padrões. Entradas inválidas falham com status 2 e diagnóstico em stderr antes de emitir o relatório.
+- [x] O comando usado pelo app aceita uma lista de caminhos com espaços, uma lista vazia e uma raiz salva indisponível ao lado de outra válida. O relatório continua medindo categorias comuns.
+- [x] A ajuda em português e inglês explica que a opção é repetível e substitui as raízes padrão para `scan`.
+- [x] `Run cli` passou com 22 testes.
 
 **Tests**: integration, sete casos novos em `Tests/Python/test_scan_roots_cli.py`. Exercitar o comando e o relatório enquanto as fixtures controlam a árvore de diretórios e as medições.
 **Gate**: CLI.

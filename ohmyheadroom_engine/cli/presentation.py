@@ -22,6 +22,7 @@ USAGE = Localized(
         "Uso: python3 cleanup.py [comando] [opções]\n"
         "Comandos: scan (padrão), clean, apply (lê um plano da entrada padrão).\n"
         "  scan --json [--progress]  Gera um relatório JSON e, opcionalmente, eventos de progresso.\n"
+        "  scan --scan-root PASTA  Repita para substituir as pastas padrão desta varredura.\n"
         "  clean --yes              Limpa sem pedir confirmação.\n"
         "  --permanent              Apaga de vez, sem mandar para a Lixeira.\n"
         "  apply --json             Executa o plano e retorna a comparação da seleção em JSON.\n"
@@ -32,12 +33,33 @@ USAGE = Localized(
         "Usage: python3 cleanup.py [command] [options]\n"
         "Commands: scan (default), clean, apply (reads a plan from standard input).\n"
         "  scan --json [--progress]  Print a JSON report and optional progress events.\n"
+        "  scan --scan-root FOLDER Repeat to replace the default scan roots for this run.\n"
         "  clean --yes              Clean without prompting for confirmation.\n"
         "  --permanent              Delete for good instead of moving to the Trash.\n"
         "  apply --json             Apply the plan and return the selected cleanup comparison as JSON.\n"
         "  --lang pt or --lang en   Choose the language.\n"
         "  -h, --help               Show this help."
     ),
+)
+MISSING_SCAN_ROOT = Localized(
+    pt="Informe uma pasta após --scan-root.",
+    en="Specify a folder after --scan-root.",
+)
+INVALID_SCAN_ROOT = Localized(
+    pt="A pasta de busca não está acessível: {path}",
+    en="The scan root is not an accessible directory: {path}",
+)
+INVALID_SCAN_ROOTS_INPUT = Localized(
+    pt="Esperava uma lista JSON com caminhos absolutos para as pastas de busca.",
+    en="Expected a JSON array of absolute scan root paths.",
+)
+SCAN_ROOTS_REQUIRE_SCAN = Localized(
+    pt="As opções de pastas de busca só estão disponíveis com scan.",
+    en="Scan root options are only available with scan.",
+)
+CONFLICTING_SCAN_ROOTS = Localized(
+    pt="Use apenas uma forma de informar as pastas de busca.",
+    en="Use only one way to supply scan roots.",
 )
 REFUSED_PLAN = Localized(
     pt="Plano recusado, nenhuma limpeza foi realizada: {error}",

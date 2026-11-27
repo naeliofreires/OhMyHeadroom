@@ -41,6 +41,12 @@ size and shows the execution log.
 
 The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
 shows a report without deleting anything.
+Repeat `--scan-root` to choose which project folders to search in a single run.
+The supplied paths replace the default roots for that scan.
+
+```sh
+python3 cleanup.py scan --scan-root ~/Projects --scan-root "$HOME/Work Code"
+```
 
 OhMyHeadroom supports English and Brazilian Portuguese. The app follows the system
 language by default. Use **More options (…) → Language** to change it, or pass
