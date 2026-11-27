@@ -99,6 +99,24 @@ class ScanningAdapterTests(unittest.TestCase):
         self.assertEqual(4096, categories[0].size_bytes)
         self.assertEqual(2048, categories[1].size_bytes)
 
+    def test_overlapping_roots_count_each_dependency_once(self) -> None:
+        root = Path("/runtime/projects")
+        first, second = root / "first", root / "second"
+        first_dependency, second_dependency = first / "node_modules", second / "node_modules"
+        first_walk = (str(first), ["node_modules"], [])
+        files = FakeScanFileSystem(root.parent, walks={
+            root: [(str(root), ["first", "second"], []), first_walk, (str(second), ["node_modules"], [])],
+            first: [first_walk],
+        })
+        runner = FakeScanProcessRunner("", {str(first_dependency): 4096, str(second_dependency): 2048})
+
+        _, projects = build_dependency_categories((root, first, root), ("node_modules",), files, runner)
+
+        self.assertEqual([first_dependency, second_dependency], [item.path for item in projects.paths])
+        self.assertEqual(6144, projects.size_bytes)
+        # du should measure each discovered path once, even if multiple walks found it.
+        self.assertEqual([str(first_dependency), str(second_dependency)], runner.commands[0][3:])
+
     def test_dependency_walk_prunes_git_and_dependency_directories(self) -> None:
         directories = ["node_modules", ".git", "src"]
 

@@ -76,10 +76,11 @@ def collect_dependency_dirs(
     roots: Sequence[Path], names: Sequence[str], filesystem: FileSystem | None
 ) -> list[Path]:
     """Collect dependency directories from roots. Example: ``collect_dependency_dirs(roots, names, fs)``."""
-    paths: list[Path] = []
-    for root in roots:
-        paths.extend(find_dependency_dirs(root, names, filesystem))
-    return paths
+    return list({
+        path: None
+        for root in dict.fromkeys(roots)
+        for path in find_dependency_dirs(root, names, filesystem)
+    })
 
 
 def partition_dependency_paths(
