@@ -86,7 +86,7 @@ O motor procura dependências de projetos apenas em `~/Developer`, `~/.herdr`, `
 | ROOT-07 | App | Execute | Verified |
 | ROOT-08 | App | Execute | Verified |
 | ROOT-09 | App | Execute | Verified |
-| ROOT-10 | App | Execute | Implementing |
+| ROOT-10 | App | Execute | Verified |
 | ROOT-11 | CLI | Execute | Verified |
 | ROOT-12 | CLI | Execute | Verified |
 | ROOT-13 | CLI | Execute | Verified |

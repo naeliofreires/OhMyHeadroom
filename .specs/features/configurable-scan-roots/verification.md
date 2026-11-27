@@ -1,7 +1,7 @@
 # Configurable Scan Roots verification
 
-**Verdict**: FAIL
-**Proofs**: `proofs.md` at `0ba17c4e47`
+**Verdict**: PASS
+**Proofs**: `proofs.md`, com revisão inicial independente em `0ba17c4e47` e nova execução após as correções.
 **Corrections**: `683480ea4e`
 **Verifier**: independent sub-agent (author != verifier)
 
@@ -18,7 +18,7 @@
 | C07 | `checkScanRootChangeClearsReport` | yes — a prova corrigida em `683480ea4e` abre um relatório com uma dependência selecionada antes de cada tipo de edição e exige estado inicial, relatório e seleção vazios após adicionar ou remover. |
 | C08 | `tasks.md:152-153` walk: salvar duas raízes, mover uma, fazer Scan e reabrir a configuração | yes — o roteiro verifica descoberta na raiz disponível e conservação da entrada indisponível; `proofs.md:17` registra a visita como realizada. Não foi repetida nesta verificação. O exemplo próprio abaixo confirmou a parte de descoberta. |
 | C09 | `Tests/OhMyHeadroomTests/ScanRootChecks.swift:95` `checkBusyScanRootEdits` | yes — bloqueia o gateway nas duas fases, tenta adicionar/remover, compara fase e raízes e verifica que as edições não alcançaram as preferências. |
-| C10 | `checkIgnoredScanRootEdits` e visita ao seletor nativo | no — o modelo preserva a lista e o relatório com cancelamento e duplicata. O serviço do seletor macOS não aceitou os eventos automatizados para verificar esses dois retornos na janela final, e o usuário informou que não tinha acesso à janela na segunda solicitação. |
+| C10 | `checkIgnoredScanRootEdits` e visita nativa em `tasks.md` | yes — o usuário cancelou o seletor e confirmou a mesma raiz já cadastrada. Após cada gesto, a preferência continha uma única raiz e o painel mostrou `Rescan`, a categoria selecionada e `Selected: 4 kB`. |
 | C11 | `Tests/Python/test_scan_roots_cli.py:78` `test_scan_root_flags_replace_defaults_in_text_and_json` | yes — cobre comando explícito/implícito e texto/JSON com duas flags, exige ambas as raízes escolhidas e exclui as padrão. |
 | C12 | `test_scan_without_flag_uses_four_default_roots` | yes — a prova corrigida em `683480ea4e` chama a CLI real com um home temporário e uma preferência do app escrita no local correspondente, primeiro com uma raiz personalizada e depois com lista vazia. Em ambos os casos, encontra os projetos das quatro raízes padrão. |
 | C13 | `Tests/Python/test_scan_roots_cli.py:98` `test_invalid_scan_root_exits_before_reporting` | yes — cobre os quatro casos nomeados, inclusive acesso negado controlado; exige status 2, stdout vazio, diagnóstico e nenhuma medição pelo runner. |
@@ -30,7 +30,7 @@
 | Finding | Evidence | Fix | Closed |
 | --- | --- | --- | --- |
 | F1 — Contagem duplicada com aliases de raiz. | Exemplo próprio 1 e C15. | Deduplicar a raiz resolvida e a identidade do caminho antes de medir. | `683480ea4e` (C15) |
-| F2 — Cobertura do retorno do seletor nativo. | C02/C10 e visita registrada em `tasks.md`. | A visita confirmou a adição com o usuário. Cancelamento e confirmação de duplicata seguem pendentes na janela real e passam no modelo. | |
+| F2 — Cobertura do retorno do seletor nativo. | C02/C10 e visita registrada em `tasks.md`. | Exercitar adição, cancelamento e confirmação duplicada pelo seletor macOS. Conferir a lista salva e o relatório aberto. | `c5b2028ed1` (adição) e commit `docs(scan): close native picker verification` (C10) |
 | F3 — Cobertura parcial de outras categorias com lista vazia. | C06. | Verificar valores de cache, Docker e revisão. | `683480ea4e` (C06) |
 | F4 — Cobertura da invalidação por adição. | C07. | Verificar descarte de relatório e seleção em adição e remoção. | `683480ea4e` (C07) |
 | F5 — Independência das preferências do app. | C12. | Exercitar a CLI com preferências de lista personalizada e lista vazia em um home isolado. | `683480ea4e` (C12) |

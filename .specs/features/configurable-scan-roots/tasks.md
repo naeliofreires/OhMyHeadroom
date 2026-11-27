@@ -5,7 +5,7 @@
 Executar as tarefas com a skill `tlc-spec-driven`. Registrar o resultado do gate e marcar cada tarefa antes do seu commit local. Ao final, registrar a visita ao app e à CLI, executar os checks de `HEAD` e solicitar a avaliação independente prevista na skill.
 
 **Spec**: `.specs/features/configurable-scan-roots/spec.md`
-**Status**: In Progress
+**Status**: Done
 **Approved**: 2026-11-26 - user: "Aprovo o plano. Pode implementar na branch atual."
 **Build**: `make build-swift`
 **Run discovery**: `python3 -m unittest discover -s Tests/Python -p test_scanning_adapters.py -v`
@@ -119,7 +119,7 @@ T1 → T2 → T3 → T4
 **Done when**:
 
 - [x] Pelo menu, o usuário abriu a lista inicial, confirmou a adição de uma pasta de teste, viu o projeto após Scan, removeu a raiz e voltou ao estado inicial.
-- [ ] Cancelar a seleção e confirmar uma duplicata no seletor nativo com um relatório ativo preserva o relatório e a lista. Ambos os resultados passaram no teste de modelo.
+- [x] Cancelar a seleção e confirmar uma duplicata no seletor nativo preservou a lista, o relatório e os 4 kB selecionados. Os dois resultados também passaram no teste de modelo.
 - [x] A pasta permanece no disco. Uma nova varredura exclui seu conteúdo da descoberta e a edição persiste ao reabrir o app. A janela apresenta a lista vazia com a opção de adicionar disponível.
 - [x] `make build-swift` terminou com status 0, e a visita foi feita no app empacotado em um bundle de teste.
 
@@ -176,6 +176,6 @@ Proof: run discovery | test_overlapping_roots_count_each_dependency_once (test_s
 
 ## Handoff
 
-**Settled mid-build:** Confirmação do seletor nativo no bundle de teste, opção escolhida pelo usuário: "Sim, a pasta apareceu na lista". Para a visita de cancelamento: "Não consigo acessar a janela agora".
+**Settled mid-build:** No teste de adição, o usuário respondeu “Sim, a pasta apareceu na lista”. Na retomada, confirmou os gestos com “Consegui confirmar só o cancelamento” e “Sim, confirmei a pasta e ficou uma única entrada”.
 **Dispatched:** Verifier at `0ba17c4e47`, returned.
-**Walked:** App empacotado no macOS com identificador e preferências de teste isolados. Pelo ícone da barra de menus, `More options → Project folders…` mostrou as quatro raízes iniciais. O usuário confirmou que `Add folder` adicionou `Active Project`, também presente na preferência salva. Para verificar a descoberta com uma raiz indisponível, duas raízes foram salvas no domínio de teste e uma foi movida. `Scan` encontrou `Alpha/node_modules` na raiz disponível e o editor conservou `Missing Project`. O botão de remoção retirou `Active Project`, preservou seu arquivo sentinela e o painel voltou a `Ready to scan`. O Scan seguinte deixou de listar `Alpha/node_modules`. Após remover a última entrada e reabrir o app, o editor mostrou `No project folders` com `Add folder…`. A automação abriu e observou o seletor sobre um relatório pronto, mas não conseguiu acionar o cancelamento ou a confirmação de uma duplicata pelo serviço do macOS. A CLI, em árvore temporária, listou apenas `Cli Default/node_modules` sem flags e listou `Alpha/node_modules` e `Beta/.venv` com duas flags. Uma raiz inexistente retornou status 2, diagnóstico em stderr e stdout vazio.
+**Walked:** No bundle macOS isolado, `More options → Project folders…` mostrou as quatro raízes iniciais. O usuário confirmou a adição de `Active Project` pelo seletor nativo, e a pasta apareceu nas preferências. Em um Scan com duas raízes salvas, uma delas movida no disco, o app encontrou `Alpha/node_modules` na raiz disponível e preservou a entrada `Missing Project`. Remover `Active Project` preservou seu arquivo sentinela e voltou a `Ready to scan`. O próximo Scan deixou de listar `Alpha/node_modules`. A lista vazia persistiu ao reabrir. Na retomada, o usuário cancelou o seletor e confirmou a raiz já cadastrada `Verify Project`. A preferência manteve uma única raiz e as capturas do painel após cada gesto mostraram `Rescan`, a categoria de dependências selecionada e `Selected: 4 kB`. Na CLI com uma árvore temporária, a execução sem flags listou apenas `Cli Default/node_modules`, a execução com duas flags listou `Alpha/node_modules` e `Beta/.venv`, e uma raiz inexistente retornou status 2 com diagnóstico em stderr e stdout vazio.
