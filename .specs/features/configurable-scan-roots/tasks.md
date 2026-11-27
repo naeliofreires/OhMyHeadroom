@@ -99,10 +99,10 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] O modelo expõe os quatro padrões na primeira leitura e salva adições e remoções. Outra instância recupera a configuração, incluindo uma lista vazia ou uma entrada temporariamente indisponível.
-- [ ] Uma alteração efetiva descarta o relatório pronto e a seleção. Duplicatas, cancelamento e tentativas durante scan ou limpeza preservam a lista e o estado da operação.
-- [ ] O gateway envia a lista exata no comando, incluindo caminhos com espaços e `[]`. O modelo preserva a entrada no caso indisponível coberto em T2.
-- [ ] `Run app` passa com 36 checks.
+- [x] O modelo expõe os quatro padrões na primeira leitura e salva adições e remoções. Outra instância recupera a configuração, incluindo uma lista vazia ou uma entrada temporariamente indisponível.
+- [x] Uma alteração efetiva descarta o relatório pronto e a seleção. Duplicatas, cancelamento e tentativas durante scan ou limpeza preservam a lista e o estado da operação.
+- [x] O gateway envia a lista exata no comando, incluindo caminhos com espaços e `[]`. O modelo preserva a entrada no caso indisponível coberto em T2.
+- [x] `Run app` passou com 36 checks.
 
 **Tests**: unit e integration, sete checks de preferência e modelo e um check do contrato de transporte em `Tests/OhMyHeadroomTests/ScanRootChecks.swift`.
 **Gate**: App.

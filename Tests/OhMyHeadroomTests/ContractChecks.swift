@@ -55,9 +55,9 @@ func checkLazyResolution() async throws {
   fake.progressStep = ScanStep(position: 1, total: 1, label: makeText("Caches"), path: "~/Caches")
   let resolver = SequencedGatewayResolver(fallback: fake)
   let gateway = LazyCleanupGateway(resolve: { try resolver.resolve() })
-  do { _ = try await gateway.scan { _ in } } catch {}
+  do { _ = try await gateway.scan(dependencyRoots: []) { _ in } } catch {}
   let sink = StepSink()
-  let scanned = try await gateway.scan { sink.step = $0 }
+  let scanned = try await gateway.scan(dependencyRoots: []) { sink.step = $0 }
   let result = try await gateway.apply(scanned.safe, permanent: false)
   try check(sink.step?.position == 1, "scan progress was not forwarded")
   try check(fake.applyCallCount == 1, "apply was not forwarded")

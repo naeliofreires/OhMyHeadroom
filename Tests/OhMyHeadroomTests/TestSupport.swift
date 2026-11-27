@@ -24,7 +24,7 @@ final class FakeCleanupGateway: CleanupGateway, @unchecked Sendable {
     self.report = report
   }
 
-  func scan(onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport {
+  func scan(dependencyRoots: [String], onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport {
     if let scanError { throw scanError }
     if let progressStep { onStep(progressStep) }
     return report
@@ -100,7 +100,7 @@ actor BlockingCleanupGateway: CleanupGateway {
     return nil
   }
 
-  func scan(onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport {
+  func scan(dependencyRoots: [String], onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport {
     eventContinuation.yield("scan")
     return await withCheckedContinuation { scanContinuation = $0 }
   }

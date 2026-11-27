@@ -77,16 +77,16 @@ O motor procura dependências de projetos apenas em `~/Developer`, `~/.herdr`, `
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| ROOT-01 | App | Specify | Pending |
-| ROOT-02 | App | Specify | Pending |
-| ROOT-03 | App | Specify | Pending |
-| ROOT-04 | App | Specify | Pending |
+| ROOT-01 | App | Execute | Implementing |
+| ROOT-02 | App | Execute | Implementing |
+| ROOT-03 | App | Execute | Implementing |
+| ROOT-04 | App | Execute | Implementing |
 | ROOT-05 | App | Execute | Implementing |
 | ROOT-06 | App | Execute | Implementing |
-| ROOT-07 | App | Specify | Pending |
+| ROOT-07 | App | Execute | Implementing |
 | ROOT-08 | App | Execute | Implementing |
-| ROOT-09 | App | Specify | Pending |
-| ROOT-10 | App | Specify | Pending |
+| ROOT-09 | App | Execute | Implementing |
+| ROOT-10 | App | Execute | Implementing |
 | ROOT-11 | CLI | Execute | Verified |
 | ROOT-12 | CLI | Execute | Verified |
 | ROOT-13 | CLI | Execute | Verified |
