@@ -20,7 +20,7 @@ struct ScanAnimationView: View {
         .accessibilityHidden(true)
       VStack(spacing: 8) {
         Text("Scanning your Mac")
-          .font(.system(size: 20, weight: .semibold))
+          .font(.system(size: 20, weight: .medium))
           .foregroundStyle(.primary)
         detail
           .frame(height: 80)

@@ -21,31 +21,23 @@ enum BrandArtwork {
       NSPoint(x: square.minX + x * side, y: square.maxY - y * side)
     }
 
-    let mainArc = NSBezierPath()
-    mainArc.appendArc(
-      withCenter: cocoaPoint(0.50, 0.60),
-      radius: radius,
-      startAngle: 45,
-      endAngle: -225,
-      clockwise: true
-    )
-    mainArc.lineWidth = lineWidth
-    mainArc.lineCapStyle = .round
-    primary.setStroke()
-    mainArc.stroke()
+    func strokeArc(y: CGFloat, startAngle: CGFloat, endAngle: CGFloat, color: NSColor) {
+      let arc = NSBezierPath()
+      arc.appendArc(
+        withCenter: cocoaPoint(0.50, y),
+        radius: radius,
+        startAngle: startAngle,
+        endAngle: endAngle,
+        clockwise: true
+      )
+      arc.lineWidth = lineWidth
+      arc.lineCapStyle = .round
+      color.setStroke()
+      arc.stroke()
+    }
 
-    let cap = NSBezierPath()
-    cap.appendArc(
-      withCenter: cocoaPoint(0.50, 0.38),
-      radius: radius,
-      startAngle: 135,
-      endAngle: 45,
-      clockwise: true
-    )
-    cap.lineWidth = lineWidth
-    cap.lineCapStyle = .round
-    accent.setStroke()
-    cap.stroke()
+    strokeArc(y: 0.60, startAngle: 45, endAngle: -225, color: primary)
+    strokeArc(y: 0.38, startAngle: 135, endAngle: 45, color: accent)
   }
 
   static let menuBarImage = templateImage(size: NSSize(width: 18, height: 18))

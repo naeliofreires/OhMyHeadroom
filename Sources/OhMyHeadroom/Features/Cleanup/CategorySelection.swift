@@ -71,9 +71,7 @@ struct CategorySelection: Sendable {
     let belongs = allItemsByKey[category.key]?.contains(item) ?? false
     if !belongs { return }
     var picked = pickedByKey[category.key] ?? []
-    if picked.contains(item) {
-      picked.remove(item)
-    } else {
+    if picked.remove(item) == nil {
       picked.insert(item)
     }
     pickedByKey[category.key] = picked
@@ -91,7 +89,7 @@ struct CategorySelection: Sendable {
     if category.paths.isEmpty {
       return state(of: category) == .none ? 0 : category.sizeBytes
     }
-    let picked = category.paths.filter { isItemSelected($0.path, in: category) }
+    let picked = category.paths.lazy.filter { isItemSelected($0.path, in: category) }
     return picked.reduce(0) { $0 + $1.sizeBytes }
   }
 
@@ -99,7 +97,7 @@ struct CategorySelection: Sendable {
   /// Example: `selection.pathCountSummary(for: category)`.
   func pathCountSummary(for category: Category) -> LocalizedText? {
     let total = category.paths.count
-    let selected = category.paths.filter { isItemSelected($0.path, in: category) }.count
+    let selected = category.paths.lazy.filter { isItemSelected($0.path, in: category) }.count
     if selected == 0 || selected == total { return nil }
     return LocalizedText(
       pt: "\(selected) de \(total) caminhos",

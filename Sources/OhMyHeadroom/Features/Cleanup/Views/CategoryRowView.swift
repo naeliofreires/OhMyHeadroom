@@ -48,12 +48,12 @@ struct CategoryRowView: View {
   private var headerRow: some View {
     HStack(alignment: .firstTextBaseline, spacing: 8) {
       Text(category.label.text)
-        .font(.system(.body, weight: .semibold))
+        .font(.panelRowEmphasis)
         .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
       Text(ByteFormat.text(pickedBytes))
-        .font(.system(.body, weight: .semibold))
+        .font(.panelRowEmphasis)
         .monospacedDigit()
         .foregroundStyle(pickedBytes > 0 ? .primary : .secondary)
         .fixedSize()
@@ -100,19 +100,21 @@ struct CategoryRowView: View {
       let expanded = model.isExpanded(category)
       let visible = category.visiblePaths(expanded: expanded)
       TargetContainer {
-        ForEach(Array(visible.enumerated()), id: \.offset) { _, item in
+        ForEach(visible.indices, id: \.self) { index in
+          let item = visible[index]
+          let displayPath = item.displayPath
           HStack(spacing: 6) {
             pathCheckbox(for: item)
             Image(systemName: "folder")
               .font(.caption2)
               .foregroundStyle(.tertiary)
               .accessibilityHidden(true)
-            Text(verbatim: item.displayPath)
+            Text(verbatim: displayPath)
               .font(.system(.caption, design: .monospaced))
               .foregroundStyle(.secondary)
               .lineLimit(1)
               .truncationMode(.middle)
-              .help(item.displayPath)
+              .help(displayPath)
             Spacer(minLength: 8)
             Text(ByteFormat.text(item.sizeBytes))
               .font(.caption)
@@ -137,9 +139,11 @@ struct CategoryRowView: View {
           .padding(.top, 2)
         }
       }
-    } else if !category.commandLines.isEmpty {
+    } else if !category.commands.isEmpty {
+      let lines = category.commandLines
       TargetContainer {
-        ForEach(Array(category.commandLines.enumerated()), id: \.offset) { _, command in
+        ForEach(lines.indices, id: \.self) { index in
+          let command = lines[index]
           HStack(spacing: 6) {
             Image(systemName: "terminal")
               .font(.caption2)
@@ -191,7 +195,7 @@ struct DataKindPill: View {
 
   var body: some View {
     Text(kind.badge.text)
-      .font(.caption2.weight(.semibold))
+      .font(.panelBadge)
       .foregroundStyle(kind.tint)
       .padding(.horizontal, 6)
       .padding(.vertical, 2)

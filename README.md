@@ -207,4 +207,4 @@ swiftc Sources/OhMyHeadroom/BrandArtwork.swift Tools/make-icon.swift -o /tmp/ohm
 ## License
 
 OhMyHeadroom is released under the [MIT License](LICENSE).
-The bundled IBM Plex Sans font is distributed under the [SIL Open Font License](Sources/OhMyHeadroom/Fonts/LICENSE.txt).
+Section headings use IBM Plex Sans Medium, distributed under the [SIL Open Font License](Sources/OhMyHeadroom/Fonts/LICENSE.txt).
