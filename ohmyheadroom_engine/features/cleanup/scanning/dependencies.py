@@ -76,11 +76,21 @@ def collect_dependency_dirs(
     roots: Sequence[Path], names: Sequence[str], filesystem: FileSystem | None
 ) -> list[Path]:
     """Collect dependency directories from roots. Example: ``collect_dependency_dirs(roots, names, fs)``."""
-    return list({
-        path: None
-        for root in dict.fromkeys(roots)
-        for path in find_dependency_dirs(root, names, filesystem)
-    })
+    adapter = filesystem or FileSystem(HOME)
+    walked: set[Path] = set()
+    paths: dict[Path, Path] = {}
+    for root in dict.fromkeys(roots):
+        try:
+            resolved_root = adapter.resolve(root)
+        except (OSError, RuntimeError):
+            continue
+        if resolved_root in walked:
+            continue
+        walked.add(resolved_root)
+        for path in find_dependency_dirs(root, names, adapter):
+            # Resolve the search root only. A discovered symlink is itself a cleanup entry.
+            paths.setdefault(resolved_root / path.relative_to(root), path)
+    return list(paths.values())
 
 
 def partition_dependency_paths(

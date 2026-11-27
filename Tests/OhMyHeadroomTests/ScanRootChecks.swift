@@ -80,15 +80,22 @@ func checkPersistedScanRoots() throws {
 func checkScanRootChangeClearsReport() async throws {
   let fixture = ScanRootsFixture()
   let model = fixture.makeModel()
-  await model.scan()
-  guard let dependency = model.dependencyCategories.first else {
-    throw CheckFailure(description: "initial scan did not find the fixture dependency")
+  let folder = URL(fileURLWithPath: "/New Project")
+  let edits: [(String, () -> Void)] = [
+    ("addition", { model.addScanRoot(folder) }),
+    ("removal", { model.removeScanRoot(initialScanRoots[0]) }),
+  ]
+  for (name, edit) in edits {
+    await model.scan()
+    guard let dependency = model.dependencyCategories.first else {
+      throw CheckFailure(description: "initial scan did not find the fixture dependency")
+    }
+    model.toggle(dependency)
+    try check(model.isSelected(dependency), "fixture dependency was not selected")
+    edit()
+    try check(model.phase == .idle && model.report == nil && model.selectedKeys.isEmpty,
+              "previous report could still be used for cleanup after \(name)")
   }
-  model.toggle(dependency)
-  try check(model.isSelected(dependency), "fixture dependency was not selected")
-  model.removeScanRoot(initialScanRoots[0])
-  try check(model.phase == .idle && model.report == nil && model.selectedKeys.isEmpty,
-            "previous report could still be used for cleanup")
 }
 
 @MainActor

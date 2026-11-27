@@ -143,7 +143,7 @@ Proof: run app | PASS reopening restores the exact scan roots
 **C05** - Um scan iniciado com a configuração do app encontra dependências na raiz nova e exclui as da raiz padrão removida (ROOT-05, App AC 5).
 Proof: run cli | test_app_scan_uses_saved_roots (test_scan_roots_cli.ConfigurableScanRootsCliTests.test_app_scan_uses_saved_roots) ... ok
 
-**C06** - Com raízes do app vazias, o relatório não contém pastas de dependências e continua incluindo os resultados de cache da fixture (ROOT-06, App AC 6).
+**C06** - Com raízes do app vazias, o relatório não contém pastas de dependências e mantém os resultados de cache, Docker e revisão da fixture (ROOT-06, App AC 6).
 Proof: run cli | test_app_scan_with_empty_roots_keeps_other_categories (test_scan_roots_cli.ConfigurableScanRootsCliTests.test_app_scan_with_empty_roots_keeps_other_categories) ... ok
 
 **C07** - Alterar a lista com um relatório pronto encerra a seleção, descarta o relatório e volta ao estado inicial de Scan (ROOT-07, App AC 7).
@@ -176,5 +176,5 @@ Proof: run discovery | test_overlapping_roots_count_each_dependency_once (test_s
 ## Handoff
 
 **Settled mid-build:** none.
-**Dispatched:** none.
+**Dispatched:** Verifier at `0ba17c4e47`, returned.
 **Walked:** App empacotado no macOS com identificador e preferências de teste isolados. Pelo ícone da barra de menus, abrir `More options → Project folders…` mostrou as quatro raízes iniciais e abriu o seletor nativo pelo botão `Add folder…`. A automação local abriu e observou o seletor, mas não conseguiu acionar a confirmação ou o cancelamento no serviço de seleção do macOS. A cobertura desses dois resultados no modelo é automática. Para verificar a descoberta no app, duas raízes foram salvas no domínio de teste antes da abertura e uma foi movida no disco. `Scan` encontrou `Alpha/node_modules` na raiz disponível e a janela conservou a entrada `Missing Project`. O botão de remoção retirou `Active Project`, preservou seu arquivo sentinela, e `Done` retornou ao painel com `Ready to scan`. O Scan seguinte deixou de listar `Alpha/node_modules`. Depois da remoção da última entrada, o app foi encerrado e reaberto, e a janela mostrou `No project folders` e `Add folder…`. CLI em árvore temporária: sem flags, o JSON listou apenas `Cli Default/node_modules`. Com duas flags, listou `Alpha/node_modules` e `Beta/.venv`. Uma raiz inexistente retornou status 2, diagnóstico em stderr e stdout vazio.

@@ -2,6 +2,10 @@
 
 import io
 import json
+import os
+import plistlib
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -12,7 +16,7 @@ from unittest.mock import patch
 from adapter_fakes import FakeScanFileSystem, FakeScanProcessRunner
 from cleanup_test_support import localized
 from ohmyheadroom_engine.cli import commands
-from ohmyheadroom_engine.features.cleanup.catalog import SafeRule
+from ohmyheadroom_engine.features.cleanup.catalog import ReviewRule, SafeRule
 from ohmyheadroom_engine.features.cleanup.scanning.report import ScanRuntime, build_report
 
 
@@ -35,6 +39,7 @@ class ConfigurableScanRootsCliTests(unittest.TestCase):
             path.mkdir()
         cache = self.workspace / "cache"
         self.cache_entry = cache / "data"
+        self.review_folder = self.workspace / "review"
         roots = (*self.defaults, *self.custom)
         self.files = ScanRootFileSystem(
             self.home,
@@ -42,9 +47,10 @@ class ConfigurableScanRootsCliTests(unittest.TestCase):
             children={cache: [self.cache_entry]},
         )
         self.runner = FakeScanProcessRunner(
-            "",
+            "Images|1GB (10%)\nBuild Cache|2GB (10%)\nLocal Volumes|3GB (10%)",
             {
                 str(self.cache_entry): 1024,
+                str(self.review_folder): 2048,
                 **{str(root / "node_modules"): 4096 for root in roots},
             },
         )
@@ -53,7 +59,8 @@ class ConfigurableScanRootsCliTests(unittest.TestCase):
     def scan_fixture(self, progress=None, runtime=None):
         isolated = replace(
             runtime or ScanRuntime(), filesystem=self.files, process_runner=self.runner,
-            safe_rules=self.rules, review_rules=(),
+            safe_rules=self.rules,
+            review_rules=(ReviewRule(localized("Review"), localized("Review"), self.review_folder),),
         )
         return build_report(progress, isolated)
 
@@ -90,10 +97,23 @@ class ConfigurableScanRootsCliTests(unittest.TestCase):
                     self.assertNotIn(f"~/{root.name}/node_modules", output)
 
     def test_scan_without_flag_uses_four_default_roots(self) -> None:
-        self.run_cli(["scan", "--json", "--scan-root", str(self.custom[0])])
-        status, output, error = self.run_cli(["scan", "--json"])
-        self.assertEqual((0, ""), (status, error))
-        self.assert_dependency_roots(output, self.defaults)
+        home = self.workspace / "home"
+        preferences = home / "Library" / "Preferences" / "local.police-scan.plist"
+        preferences.parent.mkdir(parents=True)
+        roots = [home / name for name in ("Developer", ".herdr", ".t3", ".synara")]
+        for root in (*roots, *self.custom):
+            (root / "node_modules").mkdir(exist_ok=True, parents=True)
+        repository = Path(__file__).resolve().parents[2]
+        env = dict(os.environ, HOME=str(home), CFFIXED_USER_HOME=str(home), PATH=os.defpath)
+        for saved_roots in ([str(self.custom[0])], []):
+            with self.subTest(saved_roots=saved_roots):
+                preferences.write_bytes(plistlib.dumps({"dependencyScanRoots": saved_roots}))
+                result = subprocess.run(
+                    [sys.executable, str(repository / "cleanup.py"), "scan", "--json"],
+                    env=env, text=True, capture_output=True, timeout=10,
+                )
+                self.assertEqual((0, ""), (result.returncode, result.stderr))
+                self.assert_dependency_roots(result.stdout, roots)
 
     def test_invalid_scan_root_exits_before_reporting(self) -> None:
         file = self.workspace / "file"
@@ -141,6 +161,12 @@ class ConfigurableScanRootsCliTests(unittest.TestCase):
         categories = self.assert_dependency_roots(output, ())
         cache = next(category for category in categories if category["key"] == "cache")
         self.assertEqual([{"path": str(self.cache_entry), "size_bytes": 1024}], cache["paths"])
+        docker = next(category for category in categories if category["key"] == "docker-prune")
+        self.assertEqual(3_000_000_000, docker["size_bytes"])
+        self.assertEqual(
+            [(str(self.review_folder), 2048), (None, 3_000_000_000)],
+            [(item["folder"], item["size_bytes"]) for item in json.loads(output)["review"]],
+        )
 
     def test_app_scan_skips_unavailable_roots(self) -> None:
         roots = (self.workspace / "blocked", self.workspace / "missing", self.custom[0])

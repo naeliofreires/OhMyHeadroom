@@ -2,6 +2,7 @@
 
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from adapter_fakes import FakeScanFileSystem, FakeScanProcessRunner
 from ohmyheadroom_engine.features.cleanup.catalog import ReviewRule, SafeRule
@@ -116,6 +117,28 @@ class ScanningAdapterTests(unittest.TestCase):
         self.assertEqual(6144, projects.size_bytes)
         # du should measure each discovered path once, even if multiple walks found it.
         self.assertEqual([str(first_dependency), str(second_dependency)], runner.commands[0][3:])
+        self.check_symlink_roots_count_each_dependency_once()
+
+    def check_symlink_roots_count_each_dependency_once(self) -> None:
+        with TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            root = base / "projects"
+            project = root / "first"
+            dependency = project / "node_modules"
+            dependency.mkdir(parents=True)
+            root_alias = base / "linked-projects"
+            project_alias = base / "linked-first"
+            root_alias.symlink_to(root, target_is_directory=True)
+            project_alias.symlink_to(project, target_is_directory=True)
+            runner = FakeScanProcessRunner("", {str(dependency): 4096})
+
+            _, projects = build_dependency_categories(
+                (root, root_alias, project_alias), ("node_modules",), process_runner=runner
+            )
+
+            self.assertEqual([dependency], [item.path for item in projects.paths])
+            self.assertEqual(4096, projects.size_bytes)
+            self.assertEqual([str(dependency)], runner.commands[0][3:])
 
     def test_dependency_walk_prunes_git_and_dependency_directories(self) -> None:
         directories = ["node_modules", ".git", "src"]
