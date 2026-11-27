@@ -39,8 +39,18 @@ The panel shows progress while the engine clears the selection and measures what
 remains. The result compares the selected size from the scan with the remaining
 size and shows the execution log.
 
+Use **More options (…) → Project folders…** to add or remove folders searched for
+project dependencies. Changes are saved automatically and take effect on the next
+Scan. An empty list turns off dependency discovery.
+
 The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
 shows a report without deleting anything.
+Repeat `--scan-root` to choose which project folders to search in a single run.
+The supplied paths replace the default roots for that scan.
+
+```sh
+python3 cleanup.py scan --scan-root ~/Projects --scan-root "$HOME/Work Code"
+```
 
 OhMyHeadroom supports English and Brazilian Portuguese. The app follows the system
 language by default. Use **More options (…) → Language** to change it, or pass
@@ -51,7 +61,8 @@ OhMyHeadroom follows the macOS appearance by default and remembers your selectio
 
 ## How it works
 
-The app runs `python3 cleanup.py scan --json --progress` to get a scan report on
+The app runs `python3 cleanup.py scan --json --progress --scan-roots-stdin` with
+its saved project folders as a JSON array on stdin. It reads the scan report on
 stdout and progress events on stderr. After you confirm a selection, it sends
 the selected categories as JSON on stdin to `python3 cleanup.py apply --json`.
 The Python engine performs all deletions and returns the selected sizes before

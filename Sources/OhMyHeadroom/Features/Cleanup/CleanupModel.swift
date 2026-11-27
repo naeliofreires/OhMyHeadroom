@@ -22,10 +22,16 @@ final class CleanupModel {
     case unavailable
   }
 
+  private static let scanRootsPreferenceKey = "dependencyScanRoots"
+  private static let defaultScanRoots = ["Developer", ".herdr", ".t3", ".synara"].map {
+    URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent($0).path
+  }
+
   private let gateway: any CleanupGateway
   private let freeSpaceReader: any FreeSpaceReader
   private let updateChecker: any UpdateChecking
   private let updateCooldown: TimeInterval
+  private let defaults: UserDefaults
   private var lastUpdateCheckAt: Date?
   private(set) var phase: Phase = .idle
   private(set) var report: ScanReport?
@@ -37,17 +43,21 @@ final class CleanupModel {
   /// On by default: cleaning moves selected paths to the Trash; off deletes them for good.
   var movesToTrash = true
   private(set) var freeBytes: Int?
+  private(set) var scanRoots: [String]
 
   init(
     gateway: any CleanupGateway,
     freeSpaceReader: any FreeSpaceReader = FileSystemFreeSpaceReader(),
     updateChecker: any UpdateChecking = NoopUpdateChecker(),
-    updateCooldown: TimeInterval = 900
+    updateCooldown: TimeInterval = 900,
+    defaults: UserDefaults = .standard
   ) {
     self.gateway = gateway
     self.freeSpaceReader = freeSpaceReader
     self.updateChecker = updateChecker
     self.updateCooldown = updateCooldown
+    self.defaults = defaults
+    scanRoots = defaults.stringArray(forKey: Self.scanRootsPreferenceKey) ?? Self.defaultScanRoots
     freeBytes = freeSpaceReader.currentFreeBytes()
   }
 
@@ -62,6 +72,25 @@ final class CleanupModel {
 
   var canReset: Bool {
     phase != .idle && !isBusy
+  }
+
+  func addScanRoot(_ folder: URL?) {
+    guard !isBusy, let folder, folder.isFileURL else { return }
+    let path = folder.standardizedFileURL.path
+    guard !scanRoots.contains(path) else { return }
+    scanRoots.append(path)
+    saveScanRoots()
+  }
+
+  func removeScanRoot(_ path: String) {
+    guard !isBusy, let index = scanRoots.firstIndex(of: path) else { return }
+    scanRoots.remove(at: index)
+    saveScanRoots()
+  }
+
+  private func saveScanRoots() {
+    defaults.set(scanRoots, forKey: Self.scanRootsPreferenceKey)
+    reset()
   }
 
   func reset() {
@@ -205,7 +234,7 @@ final class CleanupModel {
     phase = .scanning
     currentStep = nil
     do {
-      let fresh = try await gateway.scan { [weak self] step in
+      let fresh = try await gateway.scan(dependencyRoots: scanRoots) { [weak self] step in
         Task { @MainActor in
           guard self?.phase == .scanning else { return }
           self?.showStep(step)

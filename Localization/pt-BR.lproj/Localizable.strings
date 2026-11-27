@@ -26,6 +26,14 @@
 "System" = "Sistema";
 "Light" = "Claro";
 "Dark" = "Escuro";
+"Project folders…" = "Pastas de projetos…";
+"Project folders" = "Pastas de projetos";
+"Choose where OhMyHeadroom looks for project dependencies." = "Escolha onde o OhMyHeadroom procura dependências de projetos.";
+"No project folders" = "Nenhuma pasta de projetos";
+"Dependency scanning is off. Add a folder to enable it." = "A busca de dependências está desativada. Adicione uma pasta para ativá-la.";
+"Add folder…" = "Adicionar pasta…";
+"Add folder" = "Adicionar pasta";
+"Remove %@" = "Remover %@";
 "Ready to scan" = "Pronto para medir";
 "Scanning only measures disk usage." = "A medição apenas verifica o uso do disco.";
 "Clearing selected categories…" = "Limpando as categorias selecionadas…";

@@ -51,10 +51,10 @@ struct CleanupEngine: CleanupGateway, Sendable {
   }
 
   /// Runs the scan. onStep is called as soon as the engine starts measuring each folder.
-  func scan(onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport {
+  func scan(dependencyRoots: [String], onStep: @escaping @Sendable (ScanStep) -> Void) async throws -> ScanReport {
     let output = try await transport.exchange(
-      arguments: ["scan", "--json", "--progress"],
-      input: Data(),
+      arguments: ["scan", "--json", "--progress", "--scan-roots-stdin"],
+      input: try EngineJSON.encoder().encode(dependencyRoots),
       onStep: onStep
     )
     return try EngineJSON.decoder().decode(ScanReport.self, from: output)

@@ -20,3 +20,11 @@
 "Scan again to refresh all categories." = "Scan again to refresh all categories.";
 "Move to Trash" = "Move to Trash";
 "Space is freed only when the Trash is emptied." = "Space is freed only when the Trash is emptied.";
+"Project folders…" = "Project folders…";
+"Project folders" = "Project folders";
+"Choose where OhMyHeadroom looks for project dependencies." = "Choose where OhMyHeadroom looks for project dependencies.";
+"No project folders" = "No project folders";
+"Dependency scanning is off. Add a folder to enable it." = "Dependency scanning is off. Add a folder to enable it.";
+"Add folder…" = "Add folder…";
+"Add folder" = "Add folder";
+"Remove %@" = "Remove %@";

@@ -1,18 +1,25 @@
 """CLI orchestration for the cleanup feature."""
 
 import io
+import json
 import os
 import sys
 from collections.abc import Sequence
 from contextlib import nullcontext, redirect_stdout
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable, TextIO
 
 from ohmyheadroom_engine.cli.presentation import (
     CANCELLED,
     CONFIRM_QUESTION,
+    CONFLICTING_SCAN_ROOTS,
+    INVALID_SCAN_ROOT,
+    INVALID_SCAN_ROOTS_INPUT,
     MEASURING_NOTICE,
+    MISSING_SCAN_ROOT,
     REFUSED_PLAN,
+    SCAN_ROOTS_REQUIRE_SCAN,
     USAGE,
     format_size,
     print_freed_space,
@@ -27,6 +34,7 @@ from ohmyheadroom_engine.features.cleanup.contracts import (
 from ohmyheadroom_engine.features.cleanup.execution.runner import DeleteMode, clean_category
 from ohmyheadroom_engine.features.cleanup.scanning.measurements import measure_selected_bytes
 from ohmyheadroom_engine.features.cleanup.scanning.report import (
+    ScanRuntime,
     build_report,
     disk_free_bytes,
 )
@@ -40,6 +48,8 @@ YES_FLAG = "--yes"
 JSON_FLAG = "--json"
 PERMANENT_FLAG = "--permanent"
 PROGRESS_FLAG = "--progress"
+SCAN_ROOT_FLAG = "--scan-root"
+SCAN_ROOTS_STDIN_FLAG = "--scan-roots-stdin"
 HELP_FLAGS = ("-h", "--help")
 # Portuguese and English affirmative answers are accepted by the same CLI.
 YES_ANSWERS: tuple[str, ...] = ("s", "sim", "y", "yes")
@@ -56,11 +66,12 @@ class CleanupOperations:
     measure_selected: Callable[[Sequence[Category]], int | None]
 
 
-def default_operations() -> CleanupOperations:
-    """Build production operations. Example: ``ops = default_operations()``."""
+def default_operations(dependency_roots: Sequence[Path] | None = None) -> CleanupOperations:
+    """Build production operations for the requested dependency search roots."""
+    runtime = None if dependency_roots is None else ScanRuntime(dependency_roots=dependency_roots)
     return CleanupOperations(
-        scan=build_report,
-        scan_with_progress=lambda stream: build_report(ProgressReporter(stream)),
+        scan=lambda: build_report(runtime=runtime),
+        scan_with_progress=lambda stream: build_report(ProgressReporter(stream), runtime),
         free_bytes=disk_free_bytes,
         apply=apply_category,
         measure_selected=measure_selected_bytes,
@@ -75,7 +86,12 @@ def main(
         print(USAGE.for_language(language))
         return 0
 
-    active = operations or default_operations()
+    try:
+        argv, dependency_roots = scan_options(argv, language)
+    except ValueError as error:
+        print(error, file=sys.stderr)
+        return 2
+    active = operations or default_operations(dependency_roots)
     words = positional_words(argv)
     command = words[0] if words else SCAN_COMMAND
     if command == SCAN_COMMAND:
@@ -118,6 +134,66 @@ def positional_words(argv: Sequence[str]) -> list[str]:
         index = words.index("--lang")
         del words[index : index + 2]
     return [word for word in words if not word.startswith("--")]
+
+
+def scan_options(argv: Sequence[str], language: str) -> tuple[list[str], tuple[Path, ...] | None]:
+    """Extract scan roots while leaving the other command arguments intact."""
+    remaining: list[str] = []
+    explicit: list[str] = []
+    from_stdin = False
+    words = iter(argv)
+    for word in words:
+        flag, separator, value = word.partition("=")
+        if flag == SCAN_ROOT_FLAG:
+            if not separator:
+                value = next(words, "")
+                if value.startswith("-"):
+                    value = ""
+            if not value:
+                raise ValueError(MISSING_SCAN_ROOT.for_language(language))
+            explicit.append(value)
+        elif word == SCAN_ROOTS_STDIN_FLAG:
+            from_stdin = True
+        else:
+            remaining.append(word)
+
+    if not explicit and not from_stdin:
+        return remaining, None
+    command_words = positional_words(remaining)
+    if command_words and command_words[0] != SCAN_COMMAND:
+        raise ValueError(SCAN_ROOTS_REQUIRE_SCAN.for_language(language))
+    if from_stdin and explicit:
+        raise ValueError(CONFLICTING_SCAN_ROOTS.for_language(language))
+    if from_stdin:
+        return remaining, scan_roots_from_stdin(language)
+    return remaining, tuple(checked_scan_root(value, language) for value in explicit)
+
+
+def scan_roots_from_stdin(language: str) -> tuple[Path, ...]:
+    """Read the app's absolute paths without requiring previously saved folders to exist."""
+    message = INVALID_SCAN_ROOTS_INPUT.for_language(language)
+    try:
+        decoded: object = json.load(sys.stdin)
+    except ValueError as error:
+        raise ValueError(message) from error
+    if not isinstance(decoded, list) or not all(
+        isinstance(value, str) and value.startswith("/") and "\0" not in value
+        for value in decoded
+    ):
+        raise ValueError(message)
+    return tuple(Path(value) for value in decoded)
+
+
+def checked_scan_root(value: str, language: str) -> Path:
+    """Expand a CLI path and verify it can be walked before running the scan."""
+    try:
+        root = Path(value).expanduser().resolve(strict=True)
+        with os.scandir(root):
+            if os.access(root, os.X_OK):
+                return root
+    except (OSError, RuntimeError, ValueError):
+        pass
+    raise ValueError(INVALID_SCAN_ROOT.render(language, path=repr(value)))
 
 
 def run_scan(language: str, operations: CleanupOperations | None = None) -> int:
