@@ -78,7 +78,7 @@ O motor procura dependências de projetos apenas em `~/Developer`, `~/.herdr`, `
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
 | ROOT-01 | App | Execute | Verified |
-| ROOT-02 | App | Execute | Implementing |
+| ROOT-02 | App | Execute | Verified |
 | ROOT-03 | App | Execute | Verified |
 | ROOT-04 | App | Execute | Verified |
 | ROOT-05 | App | Execute | Verified |

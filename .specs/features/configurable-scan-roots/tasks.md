@@ -118,7 +118,8 @@ T1 → T2 → T3 → T4
 
 **Done when**:
 
-- [ ] Pelo menu, o usuário abre a lista inicial, adiciona uma pasta de teste, cancela outra tentativa, vê o projeto após Scan, remove a raiz e volta ao estado inicial.
+- [x] Pelo menu, o usuário abriu a lista inicial, confirmou a adição de uma pasta de teste, viu o projeto após Scan, removeu a raiz e voltou ao estado inicial.
+- [ ] Cancelar a seleção e confirmar uma duplicata no seletor nativo com um relatório ativo preserva o relatório e a lista. Ambos os resultados passaram no teste de modelo.
 - [x] A pasta permanece no disco. Uma nova varredura exclui seu conteúdo da descoberta e a edição persiste ao reabrir o app. A janela apresenta a lista vazia com a opção de adicionar disponível.
 - [x] `make build-swift` terminou com status 0, e a visita foi feita no app empacotado em um bundle de teste.
 
@@ -175,6 +176,6 @@ Proof: run discovery | test_overlapping_roots_count_each_dependency_once (test_s
 
 ## Handoff
 
-**Settled mid-build:** none.
+**Settled mid-build:** Confirmação do seletor nativo no bundle de teste, opção escolhida pelo usuário: "Sim, a pasta apareceu na lista". Para a visita de cancelamento: "Não consigo acessar a janela agora".
 **Dispatched:** Verifier at `0ba17c4e47`, returned.
-**Walked:** App empacotado no macOS com identificador e preferências de teste isolados. Pelo ícone da barra de menus, abrir `More options → Project folders…` mostrou as quatro raízes iniciais e abriu o seletor nativo pelo botão `Add folder…`. A automação local abriu e observou o seletor, mas não conseguiu acionar a confirmação ou o cancelamento no serviço de seleção do macOS. A cobertura desses dois resultados no modelo é automática. Para verificar a descoberta no app, duas raízes foram salvas no domínio de teste antes da abertura e uma foi movida no disco. `Scan` encontrou `Alpha/node_modules` na raiz disponível e a janela conservou a entrada `Missing Project`. O botão de remoção retirou `Active Project`, preservou seu arquivo sentinela, e `Done` retornou ao painel com `Ready to scan`. O Scan seguinte deixou de listar `Alpha/node_modules`. Depois da remoção da última entrada, o app foi encerrado e reaberto, e a janela mostrou `No project folders` e `Add folder…`. CLI em árvore temporária: sem flags, o JSON listou apenas `Cli Default/node_modules`. Com duas flags, listou `Alpha/node_modules` e `Beta/.venv`. Uma raiz inexistente retornou status 2, diagnóstico em stderr e stdout vazio.
+**Walked:** App empacotado no macOS com identificador e preferências de teste isolados. Pelo ícone da barra de menus, `More options → Project folders…` mostrou as quatro raízes iniciais. O usuário confirmou que `Add folder` adicionou `Active Project`, também presente na preferência salva. Para verificar a descoberta com uma raiz indisponível, duas raízes foram salvas no domínio de teste e uma foi movida. `Scan` encontrou `Alpha/node_modules` na raiz disponível e o editor conservou `Missing Project`. O botão de remoção retirou `Active Project`, preservou seu arquivo sentinela e o painel voltou a `Ready to scan`. O Scan seguinte deixou de listar `Alpha/node_modules`. Após remover a última entrada e reabrir o app, o editor mostrou `No project folders` com `Add folder…`. A automação abriu e observou o seletor sobre um relatório pronto, mas não conseguiu acionar o cancelamento ou a confirmação de uma duplicata pelo serviço do macOS. A CLI, em árvore temporária, listou apenas `Cli Default/node_modules` sem flags e listou `Alpha/node_modules` e `Beta/.venv` com duas flags. Uma raiz inexistente retornou status 2, diagnóstico em stderr e stdout vazio.
