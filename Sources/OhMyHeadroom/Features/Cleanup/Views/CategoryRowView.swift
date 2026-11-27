@@ -8,8 +8,11 @@ struct CategoryRowView: View {
 
   var body: some View {
     VStack(alignment: .leading, spacing: 8) {
-      Toggle(isOn: selectionBinding) {
+      Button {
+        model.toggle(category)
+      } label: {
         HStack(alignment: .top, spacing: 10) {
+          SelectionCheckbox(state: model.selectionState(of: category))
           categoryIcon
           VStack(alignment: .leading, spacing: 4) {
             headerRow
@@ -21,7 +24,7 @@ struct CategoryRowView: View {
           }
         }
       }
-      .toggleStyle(.checkbox)
+      .buttonStyle(.plain)
       .help(category.note.text)
 
       targetBreakdown
@@ -49,12 +52,17 @@ struct CategoryRowView: View {
         .foregroundStyle(.primary)
         .fixedSize(horizontal: false, vertical: true)
       Spacer(minLength: 8)
-      Text(ByteFormat.text(category.sizeBytes))
+      Text(ByteFormat.text(pickedBytes))
         .font(.system(.body, weight: .semibold))
         .monospacedDigit()
-        .foregroundStyle(category.sizeBytes > 0 ? .primary : .secondary)
+        .foregroundStyle(pickedBytes > 0 ? .primary : .secondary)
         .fixedSize()
     }
+  }
+
+  /// The header shows what the user picked, so a partly picked row matches what will be cleared.
+  private var pickedBytes: Int {
+    model.pickedBytes(for: category)
   }
 
   private var metadataRow: some View {
@@ -75,6 +83,18 @@ struct CategoryRowView: View {
   }
 
   @ViewBuilder
+  private func pathCheckbox(for item: SizedPath) -> some View {
+    if CategorySelection.allowsPathPicking(category) {
+      Button {
+        model.toggleItem(item.path, in: category)
+      } label: {
+        SelectionCheckbox(state: model.itemState(item.path, in: category))
+      }
+      .buttonStyle(.plain)
+    }
+  }
+
+  @ViewBuilder
   private var targetBreakdown: some View {
     if !category.paths.isEmpty {
       let expanded = model.isExpanded(category)
@@ -82,6 +102,7 @@ struct CategoryRowView: View {
       TargetContainer {
         ForEach(Array(visible.enumerated()), id: \.offset) { _, item in
           HStack(spacing: 6) {
+            pathCheckbox(for: item)
             Image(systemName: "folder")
               .font(.caption2)
               .foregroundStyle(.tertiary)
@@ -141,12 +162,6 @@ struct CategoryRowView: View {
     }
   }
 
-  private var selectionBinding: Binding<Bool> {
-    Binding(
-      get: { model.isSelected(category) },
-      set: { _ in model.toggle(category) }
-    )
-  }
 }
 
 /// Shared inset container for listing affected paths or commands under a row.

@@ -56,6 +56,13 @@ struct PhaseContentView: View {
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
+              if let summary = model.pathCountSummary(forKey: category.key) {
+                Text(verbatim: "· \(summary.text)")
+                  .font(.caption)
+                  .monospacedDigit()
+                  .foregroundStyle(.secondary)
+                  .lineLimit(1)
+              }
               Spacer(minLength: 8)
               Text(ByteFormat.text(category.sizeBytes))
                 .font(.caption.monospacedDigit())

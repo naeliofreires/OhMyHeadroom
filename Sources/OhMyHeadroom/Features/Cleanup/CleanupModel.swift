@@ -29,7 +29,7 @@ final class CleanupModel {
   private var lastUpdateCheckAt: Date?
   private(set) var phase: Phase = .idle
   private(set) var report: ScanReport?
-  private(set) var selectedKeys: Set<String> = []
+  private(set) var selection = CategorySelection(categories: [])
   private(set) var expandedKeys: Set<String> = []
   private(set) var updateStatus: UpdateStatus = .idle
   /// Held here rather than in a view's @State: the Command Line Tools cannot expand @State.
@@ -67,7 +67,7 @@ final class CleanupModel {
   func reset() {
     guard canReset else { return }
     report = nil
-    selectedKeys = []
+    selection = CategorySelection(categories: [])
     expandedKeys = []
     currentStep = nil
     isConfirmingClean = false
@@ -83,8 +83,22 @@ final class CleanupModel {
     report?.safe.filter { $0.dataKind.group == .dependencies } ?? []
   }
 
+  /// Keys of the categories with at least one picked item.
+  var selectedKeys: Set<String> {
+    let keys = (report?.safe ?? [])
+      .filter { selection.state(of: $0) != .none }
+      .map(\.key)
+    return Set(keys)
+  }
+
+  /// "3 de 12 caminhos" for a category the user only partly picked, looked up by key in the scan.
+  func pathCountSummary(forKey key: String) -> LocalizedText? {
+    guard let category = report?.safe.first(where: { $0.key == key }) else { return nil }
+    return selection.pathCountSummary(for: category)
+  }
+
   var selectedCategories: [Category] {
-    report?.safe.filter { selectedKeys.contains($0.key) } ?? []
+    selection.selectedCategories(from: report?.safe ?? [])
   }
 
   var selectedBytes: Int {
@@ -136,16 +150,32 @@ final class CleanupModel {
     }
   }
 
+  func selectionState(of category: Category) -> CategorySelection.State {
+    selection.state(of: category)
+  }
+
   func isSelected(_ category: Category) -> Bool {
-    selectedKeys.contains(category.key)
+    selection.state(of: category) != .none
+  }
+
+  func isItemSelected(_ item: String, in category: Category) -> Bool {
+    selection.isItemSelected(item, in: category)
+  }
+
+  func pickedBytes(for category: Category) -> Int {
+    selection.pickedBytes(for: category)
+  }
+
+  func itemState(_ item: String, in category: Category) -> CategorySelection.State {
+    selection.itemState(item, in: category)
   }
 
   func toggle(_ category: Category) {
-    if selectedKeys.contains(category.key) {
-      selectedKeys.remove(category.key)
-    } else {
-      selectedKeys.insert(category.key)
-    }
+    selection.toggleCategory(category)
+  }
+
+  func toggleItem(_ item: String, in category: Category) {
+    selection.toggleItem(item, in: category)
   }
 
   func isExpanded(_ category: Category) -> Bool {
@@ -182,7 +212,7 @@ final class CleanupModel {
         }
       }
       report = fresh
-      selectedKeys = Set(fresh.safe.filter { !$0.isOffByDefault }.map(\.key))
+      selection = CategorySelection(categories: fresh.safe)
       expandedKeys = []
       freeBytes = fresh.freeBytes
       phase = .ready
@@ -204,7 +234,7 @@ final class CleanupModel {
       phase = .failed(message: error.localizedDescription)
     }
     report = nil
-    selectedKeys = []
+    selection = CategorySelection(categories: [])
     expandedKeys = []
     freeBytes = freeSpaceReader.currentFreeBytes()
   }
