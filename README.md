@@ -3,13 +3,13 @@
 <img src="Resources/OhMyHeadroom-icon.png" alt="OhMyHeadroom app icon" width="112" />
 
 OhMyHeadroom finds files your Mac can recreate, such as caches, downloaded packages,
-Docker images, dependencies, and build artifacts. It estimates how much space each
-category could free and deletes only the categories you select.
+Docker images, dependencies, and build artifacts. It shows how much space they
+occupy and lets you choose what to clear.
 
-- **OhMyHeadroom.app** is a SwiftUI menu bar app with scan progress and a confirmation step.
+- **OhMyHeadroom.app** is a SwiftUI menu bar app with scan progress, per-folder selection, and a confirmation step.
 - **`cleanup.py`**: the command-line interface, using the same engine as the app.
 
-<img src="Resources/OhMyHeadroom-screenshot.png" alt="OhMyHeadroom in dark mode showing scan results, estimated space, and the Clear button" width="460" />
+<img src="Resources/OhMyHeadroom-screenshot.png" alt="OhMyHeadroom showing scan results, dependency folders, selected space, and the Clear button" width="460" />
 
 ## Install from source
 
@@ -33,24 +33,37 @@ the new app. Your language and theme preferences carry over.
 open "$HOME/Applications/OhMyHeadroom.app"
 ```
 
-When OhMyHeadroom appears in the menu bar, click **Scan** to see what it found.
-Select the categories you want to clear, then click **Clear…** and confirm.
-The panel shows progress while the engine clears the selection and measures what
-remains. The result compares the selected size from the scan with the remaining
-size and shows the execution log.
+## Using the menu bar app
 
-Use **More options (…) → Project folders…** to add or remove folders searched for
-project dependencies. Changes are saved automatically and take effect on the next
-Scan. An empty list turns off dependency discovery.
+### Choose where to scan
 
-The CLI uses the same engine. From the repository root, `python3 cleanup.py scan`
-shows a report without deleting anything.
-Repeat `--scan-root` to choose which project folders to search in a single run.
-The supplied paths replace the default roots for that scan.
+Open **More options (…) → Project folders…** to add or remove folders searched
+for project dependencies. Changes are saved for the next scan. An empty list
+turns off dependency discovery.
 
-```sh
-python3 cleanup.py scan --scan-root ~/Projects --scan-root "$HOME/Work Code"
-```
+<img src="Resources/OhMyHeadroom-project-folders.png" alt="Project folders window with the list of scan locations and controls to add or remove a folder" width="460" />
+
+### Review and confirm a selection
+
+Click **Scan**, then choose the categories or individual dependency folders to
+clear. For example, you can select an archived project's `node_modules` and keep
+the one in your active project. **Move to Trash** is on by default for files
+and folders. Turn it off for permanent deletion.
+
+Click **Clear…** to review the selected categories, folder counts, and total
+size before confirming.
+
+<img src="Resources/OhMyHeadroom-confirmation.png" alt="Cleanup confirmation showing the selected category, number of paths, and size, with Cancel and Clear buttons" width="460" />
+
+### Check the result
+
+The panel shows the size of the selected paths before and after cleanup, along
+with the execution log. Files moved to the Trash still occupy disk space until
+you empty it.
+
+<img src="Resources/OhMyHeadroom-cleanup-result.png" alt="Completed cleanup with Before, After, and Reduction measurements above the execution log" width="460" />
+
+### Language and appearance
 
 OhMyHeadroom supports English and Brazilian Portuguese. The app follows the system
 language by default. Use **More options (…) → Language** to change it, or pass
@@ -65,9 +78,9 @@ The app runs `python3 cleanup.py scan --json --progress --scan-roots-stdin` with
 its saved project folders as a JSON array on stdin. It reads the scan report on
 stdout and progress events on stderr. After you confirm a selection, it sends
 the selected categories as JSON on stdin to `python3 cleanup.py apply --json`.
-The Python engine performs all deletions and returns the selected sizes before
-and after cleanup, along with the execution log. If the remaining size cannot be
-measured, the result reports it as unavailable.
+The Python engine applies the selected cleanup actions and returns the selected
+sizes before and after cleanup, along with the execution log. If the remaining
+size cannot be measured, the result reports it as unavailable.
 
 The product is organized around one `Cleanup` feature. Scanning, selection,
 confirmation, and execution share the same category catalog and report lifecycle.
@@ -124,7 +137,7 @@ flowchart TD
 | Worktree dependencies | `node_modules`, `.venv`, `.next`, `.turbo`, and `__pycache__` in agent and Herdr worktrees |
 | Project dependencies | The same folders in primary project checkouts |
 
-OhMyHeadroom looks for project dependencies under `~/Developer`, `~/.herdr`, `~/.t3`,
+By default, OhMyHeadroom looks for project dependencies under `~/Developer`, `~/.herdr`, `~/.t3`,
 and `~/.synara`. Docker commands use the active Docker context.
 
 **Review only** (measured and listed, never deleted): Claude VM image, Docker virtual
@@ -132,6 +145,13 @@ disk, unused Docker volumes, Codex history, `~/.local/share`, Cursor state, Herd
 worktrees, MeetingMind and WhatsApp data, Downloads, Movies, and Trash.
 
 ## Command-line usage
+
+From the repository root, run `python3 cleanup.py scan` for a read-only report.
+Repeat `--scan-root` to replace the default project folders for a single scan.
+
+```sh
+python3 cleanup.py scan --scan-root ~/Projects --scan-root "$HOME/Work Code"
+```
 
 ```sh
 python3 cleanup.py --help           # Show command-line usage
@@ -161,7 +181,7 @@ trusted input.
 ## Known limitations
 
 - `du` has no timeout. A stalled folder can block the scan.
-- Project dependency scans are limited to the directories listed above.
+- Project dependency scans are limited to the configured scan folders.
 - `/tmp` and the user's temporary directory are not scanned.
 - Individual cleanup failures are printed and execution continues; a successful
   process exit does not establish that every command or path was cleaned.
